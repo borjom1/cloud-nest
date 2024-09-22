@@ -1,0 +1,28 @@
+server:
+  port: 8050
+
+spring:
+  application:
+    name: user-management-service
+
+  cloud:
+    consul:
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      discovery:
+        service-name: ${spring.application.name}
+        register: true
+        deregister: true
+        healthCheckInterval: 10s
+        health-check-url: http://host.docker.internal:${server.port}/actuator/health
+
+  liquibase:
+    enabled: ${LIQUIBASE_ENABLED:false}
+    change-log: classpath:/db/um-changelog-master.xml
+    default-schema: um
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/local_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver

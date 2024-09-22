@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagement}"
+}
+
+group = 'com.bucket'
+version = 'SNAPSHOT-1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "jakarta.validation:jakarta.validation-api:${jakartaValidationVersion}"
+
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:${lombokVersion}"
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}

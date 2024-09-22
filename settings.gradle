@@ -1,0 +1,12 @@
+rootProject.name = 'cloud-nest'
+
+include 'user-management'
+include 'platform'
+include 'user-management:um-api'
+include 'user-management:um-impl'
+include 'file-management'
+include 'file-management:fm-api'
+include 'file-management:fm-impl'
+include 'auth'
+include 'auth:auth-api'
+include 'auth:auth-impl'

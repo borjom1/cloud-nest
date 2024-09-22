@@ -1,0 +1,10 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.bucket'
+version = 'unspecified'
+
+repositories {
+    mavenCentral()
+}

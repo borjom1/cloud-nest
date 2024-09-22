@@ -1,0 +1,87 @@
+import nu.studer.gradle.jooq.JooqEdition
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagement}"
+    id 'nu.studer.jooq' version '9.0'
+}
+
+group = 'com.bucket'
+version = 'SNAPSHOT-1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(project(':user-management:um-api'))
+    implementation(project(':platform'))
+
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:${lombokVersion}"
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-jooq'
+    implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'
+
+    implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
+    implementation "org.postgresql:postgresql:${postgresVersion}"
+    jooqGenerator "org.postgresql:postgresql:${postgresVersion}"
+    implementation "org.jooq:jooq:${jooqVersion}"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+String dbUrl = System.getenv('DB_URL') ?: 'jdbc:postgresql://localhost:5433/local_db'
+String dbUser = System.getenv('DB_USER') ?: 'postgres'
+String dbPassword = System.getenv('DB_PASSWORD') ?: 'postgres'
+
+jooq {
+    version = "${jooqVersion}"
+    edition = JooqEdition.OSS
+
+    configurations {
+        main {
+            generationTool {
+                logging = org.jooq.meta.jaxb.Logging.WARN
+                jdbc {
+                    driver = 'org.postgresql.Driver'
+                    url = dbUrl
+                    user = dbUser
+                    password = dbPassword
+                }
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    database {
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'
+                        excludes = """
+                            pg_catalog.*
+                            | information_schema.*
+                            | databasechangeloglock
+                            | databasechangelog
+                        """
+                    }
+                    target {
+                        packageName = 'com.cloud.nest.db'
+                        directory = "src/main/generated-sources"
+                    }
+                }
+            }
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
