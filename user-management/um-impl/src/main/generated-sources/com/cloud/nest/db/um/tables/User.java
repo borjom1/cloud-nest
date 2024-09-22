@@ -4,6 +4,7 @@
 package com.cloud.nest.db.um.tables;
 
 
+import com.cloud.nest.db.um.Indexes;
 import com.cloud.nest.db.um.Keys;
 import com.cloud.nest.db.um.Um;
 import com.cloud.nest.db.um.tables.records.UserRecord;
@@ -16,6 +17,7 @@ import java.util.List;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Identity;
+import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
@@ -64,6 +66,21 @@ public class User extends TableImpl<UserRecord> {
     public final TableField<UserRecord, String> USERNAME = createField(DSL.name("username"), SQLDataType.VARCHAR(16), this, "");
 
     /**
+     * The column <code>um.user.password</code>.
+     */
+    public final TableField<UserRecord, String> PASSWORD = createField(DSL.name("password"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>um.user.first_name</code>.
+     */
+    public final TableField<UserRecord, String> FIRST_NAME = createField(DSL.name("first_name"), SQLDataType.VARCHAR(32).nullable(false), this, "");
+
+    /**
+     * The column <code>um.user.last_name</code>.
+     */
+    public final TableField<UserRecord, String> LAST_NAME = createField(DSL.name("last_name"), SQLDataType.VARCHAR(32).nullable(false), this, "");
+
+    /**
      * The column <code>um.user.created</code>.
      */
     public final TableField<UserRecord, LocalDateTime> CREATED = createField(DSL.name("created"), SQLDataType.LOCALDATETIME(6).nullable(false), this, "");
@@ -105,6 +122,11 @@ public class User extends TableImpl<UserRecord> {
     @Override
     public Schema getSchema() {
         return aliased() ? null : Um.UM;
+    }
+
+    @Override
+    public List<Index> getIndexes() {
+        return Arrays.asList(Indexes.USER_USERNAME_IDX);
     }
 
     @Override

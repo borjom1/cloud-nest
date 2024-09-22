@@ -22,9 +22,13 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
-    testAnnotationProcessor "org.projectlombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    implementation "org.mapstruct:mapstruct:${mapStructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapStructVersion}"
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-jooq'
     implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'
@@ -53,6 +57,7 @@ jooq {
 
     configurations {
         main {
+            generateSchemaSourceOnCompilation = false
             generationTool {
                 logging = org.jooq.meta.jaxb.Logging.WARN
                 jdbc {

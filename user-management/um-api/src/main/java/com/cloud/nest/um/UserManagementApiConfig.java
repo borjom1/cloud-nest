@@ -1,6 +1,7 @@
 package com.cloud.nest.um;
 
-import com.cloud.nest.um.impl.UserApiStandalone;
+import com.cloud.nest.um.impl.UserApiExternalStandalone;
+import com.cloud.nest.um.impl.UserApiInternalStandalone;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
@@ -20,8 +21,13 @@ public class UserManagementApiConfig {
     }
 
     @Bean
-    public UserApi userApi(@Qualifier(WEB_CLIENT) WebClient.Builder webClientBuilder) {
-        return new UserApiStandalone(webClientBuilder);
+    public UserApiExternal userApiExternal(@Qualifier(WEB_CLIENT) WebClient.Builder webClientBuilder) {
+        return new UserApiExternalStandalone(webClientBuilder);
+    }
+
+    @Bean
+    public UserApiInternal userApiInternal(@Qualifier(WEB_CLIENT) WebClient.Builder webClientBuilder) {
+        return new UserApiInternalStandalone(webClientBuilder);
     }
 
     private String getServiceBaseUrl() {

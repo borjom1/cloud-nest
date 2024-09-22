@@ -17,7 +17,7 @@ spring:
         health-check-url: http://host.docker.internal:${server.port}/actuator/health
 
   liquibase:
-    enabled: ${LIQUIBASE_ENABLED:false}
+    enabled: ${LIQUIBASE_ENABLED:true}
     change-log: classpath:/db/um-changelog-master.xml
     default-schema: um
 

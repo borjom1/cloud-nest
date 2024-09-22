@@ -49,31 +49,73 @@ public class UserRecord extends UpdatableRecordImpl<UserRecord> {
     }
 
     /**
+     * Setter for <code>um.user.password</code>.
+     */
+    public void setPassword(String value) {
+        set(2, value);
+    }
+
+    /**
+     * Getter for <code>um.user.password</code>.
+     */
+    public String getPassword() {
+        return (String) get(2);
+    }
+
+    /**
+     * Setter for <code>um.user.first_name</code>.
+     */
+    public void setFirstName(String value) {
+        set(3, value);
+    }
+
+    /**
+     * Getter for <code>um.user.first_name</code>.
+     */
+    public String getFirstName() {
+        return (String) get(3);
+    }
+
+    /**
+     * Setter for <code>um.user.last_name</code>.
+     */
+    public void setLastName(String value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>um.user.last_name</code>.
+     */
+    public String getLastName() {
+        return (String) get(4);
+    }
+
+    /**
      * Setter for <code>um.user.created</code>.
      */
     public void setCreated(LocalDateTime value) {
-        set(2, value);
+        set(5, value);
     }
 
     /**
      * Getter for <code>um.user.created</code>.
      */
     public LocalDateTime getCreated() {
-        return (LocalDateTime) get(2);
+        return (LocalDateTime) get(5);
     }
 
     /**
      * Setter for <code>um.user.updated</code>.
      */
     public void setUpdated(LocalDateTime value) {
-        set(3, value);
+        set(6, value);
     }
 
     /**
      * Getter for <code>um.user.updated</code>.
      */
     public LocalDateTime getUpdated() {
-        return (LocalDateTime) get(3);
+        return (LocalDateTime) get(6);
     }
 
     // -------------------------------------------------------------------------
@@ -99,11 +141,14 @@ public class UserRecord extends UpdatableRecordImpl<UserRecord> {
     /**
      * Create a detached, initialised UserRecord
      */
-    public UserRecord(Long id, String username, LocalDateTime created, LocalDateTime updated) {
+    public UserRecord(Long id, String username, String password, String firstName, String lastName, LocalDateTime created, LocalDateTime updated) {
         super(User.USER);
 
         setId(id);
         setUsername(username);
+        setPassword(password);
+        setFirstName(firstName);
+        setLastName(lastName);
         setCreated(created);
         setUpdated(updated);
         resetChangedOnNotNull();
