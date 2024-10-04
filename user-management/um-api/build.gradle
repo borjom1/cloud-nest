@@ -1,10 +1,10 @@
 plugins {
     id 'java'
     id 'org.springframework.boot' version "${springBootVersion}"
-    id 'io.spring.dependency-management' version '1.1.6'
+    id 'io.spring.dependency-management' version "${springDependencyManagement}"
 }
 
-group = 'com.bucket'
+group = 'com.cloud.nest'
 version = 'unspecified'
 
 repositories {

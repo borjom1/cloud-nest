@@ -18,6 +18,9 @@ public record UserOut(
         String username,
 
         @NotNull
+        String email,
+
+        @NotNull
         String firstName,
 
         @NotNull

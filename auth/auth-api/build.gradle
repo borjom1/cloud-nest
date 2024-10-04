@@ -1,10 +1,35 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagement}"
 }
 
-group = 'com.bucket'
+group = 'com.cloud.nest'
 version = 'unspecified'
 
 repositories {
     mavenCentral()
+}
+
+dependencies {
+    implementation(project(':platform'))
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation "org.springframework.boot:spring-boot-starter-webflux"
+    implementation "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    implementation "org.springframework.cloud:spring-cloud-commons:${springCloudCommonsVersion}"
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
 }

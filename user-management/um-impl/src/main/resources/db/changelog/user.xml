@@ -3,15 +3,18 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <changeSet id="1726395823" author="borjom1">
+    <changeSet id="1727901000" author="borjom1">
         <createTable tableName="user">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="user_id_pkey"/>
             </column>
             <column name="username" type="varchar(16)">
-                <constraints unique="true"/>
+                <constraints nullable="false" unique="true"/>
             </column>
-            <column name="password" type="text">
+            <column name="email" type="varchar(30)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="country" type="char(2)">
                 <constraints nullable="false"/>
             </column>
             <column name="first_name" type="varchar(32)">

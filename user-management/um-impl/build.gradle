@@ -7,7 +7,7 @@ plugins {
     id 'nu.studer.jooq' version '9.0'
 }
 
-group = 'com.bucket'
+group = 'com.cloud.nest'
 version = 'SNAPSHOT-1.0'
 
 repositories {
@@ -17,6 +17,7 @@ repositories {
 dependencies {
     implementation(project(':user-management:um-api'))
     implementation(project(':platform'))
+    implementation(project(':auth:auth-api'))
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
@@ -34,6 +35,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'
 
     implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
+    implementation "net.lbruun.springboot:preliquibase-spring-boot-starter:${preLiquibaseVersion}"
     implementation "org.postgresql:postgresql:${postgresVersion}"
     jooqGenerator "org.postgresql:postgresql:${postgresVersion}"
     implementation "org.jooq:jooq:${jooqVersion}"
@@ -50,6 +52,7 @@ dependencyManagement {
 String dbUrl = System.getenv('DB_URL') ?: 'jdbc:postgresql://localhost:5433/local_db'
 String dbUser = System.getenv('DB_USER') ?: 'postgres'
 String dbPassword = System.getenv('DB_PASSWORD') ?: 'postgres'
+String dbSchema = System.getenv('DB_SCHEMA') ?: 'um'
 
 jooq {
     version = "${jooqVersion}"
@@ -70,12 +73,8 @@ jooq {
                     name = 'org.jooq.codegen.DefaultGenerator'
                     database {
                         name = 'org.jooq.meta.postgres.PostgresDatabase'
-                        excludes = """
-                            pg_catalog.*
-                            | information_schema.*
-                            | databasechangeloglock
-                            | databasechangelog
-                        """
+                        includes = "${dbSchema}.*"
+                        excludes = "databasechangelog|databasechangeloglock"
                     }
                     target {
                         packageName = 'com.cloud.nest.db'

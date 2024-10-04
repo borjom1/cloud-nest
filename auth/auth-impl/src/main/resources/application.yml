@@ -15,3 +15,23 @@ spring:
         deregister: true
         healthCheckInterval: 10s
         health-check-url: http://host.docker.internal:${server.port}/actuator/health
+
+  liquibase:
+    enabled: ${LIQUIBASE_ENABLED:true}
+    change-log: classpath:/db/auth-changelog-master.xml
+    default-schema: auth
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/local_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+security:
+  jwt:
+    access-ttl: 3600s
+    refresh-ttl: 2d
+    issuer: 'CloudNestApi'
+    sign:
+      private_key: ${AUTH_JWT_PRIVATE_KEY:MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCjhyDVYQy5BGXSF7dwXqYhOw6lyaO7ZneHnFMVnR5KvPaadn3OOPSHLLcnh3iZE8QihCiKROORjKk4GkOWrgAZyLElbd4QH/mgndPMn92Tqg5h8gNzGXP81L953LMpPzbkk3p4n4yNJ5hjWaj47S8CW5K41LqRUKQ9HLennpMYUnv3H1GPDFkmDWpnk/WmL06ilbl6LbuV+/kwKiJoIfUC5hqh3vdi5+jpsHWpCO0Ps2e3bmFIjlttE5KZDNjgOZ56Vh4FMrX1Tt0E8cf7s+Dv8VCsszBapmnVL+3RMP76h0w0muYCsSjOdcl8aA4yNRjduT2c7eXxLcKHlgBIUiuvAgMBAAECggEAOlrvWZX/b0rldvqlqIDuMe+cQ4dYWXiwcQFVGOJvu+YA7pAYRu5GPLK1TXLnk2DdXh/hQ65fs0IJ5Q5iTjQbrxfSN3QkiYaPk0SfH2dxL8/AwC0YFAviOzhEeB1NBgwb76e9TaxKANk/ZTzKssIZQ3MgQbsQNOkdIv3LgBJzlXrPTr438IBHhmx4k5Psd/VlggF78n9dXg56iD+l1bV1ULWy2fPL04vmxI/xot9Cp+NOFHXDQkb8n6L7NVT1n9dy1zQYzAPbULpDRV8xLc3Rv9t6z0V6KsVGmiAmvMEG1C9OR9zu+XEi1BA6PPYoau200M/J1IJLhIFAdgydLyOSWQKBgQDffgTuVyoPTQPrh1Paww89IHPFHcb0ca0ZOXcuG+EOMGBE3pxtLcH6qEQ3N4GUubBd9JCysYM6nYy+KF2PlNCmVSXHnq01sGSsbituthDxWQVrwz363+twK/fDm2Yo+skdu55RhkAAE6VcBUrNcWwFGbXzDQwN6tOE6TPV4ltrBQKBgQC7UESOVrH7fKD94oLEZvPUWOMibxVUDF7OYENCAFwliBaPajznrIUgdgA2kzu7x/OrgW5ULzn9evMGOGWx9DCDFDNvbu6Xp6piVS4GjR2SV4pHdrofKER0wheL6ttbv7pNLMxirTIHc3Gpn7LZ6X5DKxCxgh8Trx/U9VFZgLKCIwKBgQCjCymHw1kwzmu0sQZQywrb+kfbHu0dOa0hgNXccoROOKaSt6CA2efw+D7D1Z+YI5tx/9BsPKpS4ctiksomzFcncWjdZ3pPd78KOFlBLFvR5rLYuhgGZMM7EyhusHjoHoUIRu6p5Pnd1HdHWakHld5LHkWp6fPIV282QHcLa1ZsDQKBgGtwrBIU6jv9DX7y6NzszJkVbxr2Kn6uJccscgeumywv9fjHEC42x5mJ9a9YHmAkXcEXGYiSGiop1rHPsY00KotVD/ev4oz8b/+9Kgw57ydcrQU2taVffHyYQ9dOnAnxXFQeCRHklBiwABcyce0KQBEY55dZsqegwJpvJ/01k66PAoGBANUWnPbd8euz+U6BBUU1GfO86p4pD4aUlH3+DvM/YhI16Cbb+41sNtaYJ2z36LxjzZG/35KmtxUhWjm+gI4HXSCRTaMxbVeQYQ+2ga8fW/ZBt419vX8Tr4gCM3yJMO3ekceaMKLuWYImoO4Crq7A4P+HrG3jKVqUrVeGg4fxjqM3}
+      public_key: ${AUTH_JWT_PUBLIC_KEY:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo4cg1WEMuQRl0he3cF6mITsOpcmju2Z3h5xTFZ0eSrz2mnZ9zjj0hyy3J4d4mRPEIoQoikTjkYypOBpDlq4AGcixJW3eEB/5oJ3TzJ/dk6oOYfIDcxlz/NS/edyzKT825JN6eJ+MjSeYY1mo+O0vAluSuNS6kVCkPRy3p56TGFJ79x9RjwxZJg1qZ5P1pi9OopW5ei27lfv5MCoiaCH1AuYaod73Yufo6bB1qQjtD7Nnt25hSI5bbROSmQzY4DmeelYeBTK19U7dBPHH+7Pg7/FQrLMwWqZp1S/t0TD++odMNJrmArEoznXJfGgOMjUY3bk9nO3l8S3Ch5YASFIrrwIDAQAB}

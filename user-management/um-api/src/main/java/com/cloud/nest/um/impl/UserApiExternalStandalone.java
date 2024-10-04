@@ -4,13 +4,11 @@ import com.cloud.nest.um.UserApiExternal;
 import com.cloud.nest.um.inout.UserIn;
 import com.cloud.nest.um.inout.UserOut;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.cloud.nest.um.UserManagementApiConfig.WEB_CLIENT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 public class UserApiExternalStandalone implements UserApiExternal {
@@ -23,7 +21,7 @@ public class UserApiExternalStandalone implements UserApiExternal {
 
     private final WebClient webClient;
 
-    public UserApiExternalStandalone(@Qualifier(WEB_CLIENT) WebClient.Builder webClientBuilder) {
+    public UserApiExternalStandalone(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.build();
     }
 

@@ -2,6 +2,7 @@ package com.cloud.nest.um.mapper;
 
 import com.cloud.nest.db.um.tables.records.UserRecord;
 import com.cloud.nest.um.inout.UserIn;
+import com.cloud.nest.um.inout.UserInternalOut;
 import com.cloud.nest.um.inout.UserOut;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
@@ -13,8 +14,9 @@ import java.time.LocalDateTime;
 public interface UmMapper {
     UserOut toOut(UserRecord record);
 
+    UserInternalOut toUserInternal(UserRecord record);
+
     @Mapping(target = "created", source = "dateTime")
     @Mapping(target = "updated", source = "dateTime")
-    @Mapping(target = "password", source = "dateTime")
-    UserRecord toRecord(UserIn in, LocalDateTime dateTime, String password);
+    UserRecord toRecord(UserIn in, LocalDateTime dateTime);
 }

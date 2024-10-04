@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    
+    <changeSet id="1727530893" author="borjom1">
+        <createTable tableName="session">
+            <column name="id" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="session_id_pkey"/>
+            </column>
+            <column name="username" type="varchar(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_ip" type="varchar(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_agent" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="json_properties" type="clob"/>
+            <column name="created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_active" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+         </createTable>
+
+        <createIndex tableName="session" indexName="session_username_idx">
+            <column name="username"/>
+        </createIndex>
+
+        <createIndex tableName="session" indexName="session_client_ip_idx">
+            <column name="client_ip"/>
+        </createIndex>
+    </changeSet>
+    
+</databaseChangeLog>

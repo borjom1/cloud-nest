@@ -1,5 +1,7 @@
 package com.cloud.nest.um.service;
 
+import com.cloud.nest.auth.AuthApiInternal;
+import com.cloud.nest.auth.inout.NewAuthUserIn;
 import com.cloud.nest.db.um.tables.records.UserRecord;
 import com.cloud.nest.um.inout.UserIn;
 import com.cloud.nest.um.inout.UserOut;
@@ -8,7 +10,6 @@ import com.cloud.nest.um.mapper.UmMapper;
 import com.cloud.nest.um.repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,9 +19,10 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserApiService {
 
-    public static final String USER_NOT_FOUND_ERROR = "User [%d] not found";
+    public static final String USER_NOT_FOUND_ERROR = "User [%s] not found";
+
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final AuthApiInternal authApiInternal;
     private final UmMapper umMapper;
 
     @Transactional
@@ -29,9 +31,17 @@ public class UserApiService {
         if (userRepository.findByUsername(in.username()).isPresent()) {
             throw new IllegalArgumentException("User with username [%s] exists".formatted(in.username()));
         }
-        final String encodedPassword = passwordEncoder.encode(in.password());
-        final UserRecord record = umMapper.toRecord(in, LocalDateTime.now(), encodedPassword);
+        final UserRecord record = umMapper.toRecord(in, LocalDateTime.now());
         userRepository.save(record);
+
+        authApiInternal.createUser(
+                NewAuthUserIn.builder()
+                        .userId(record.getId())
+                        .username(record.getUsername())
+                        .password(in.password())
+                        .build()
+        ).join();
+
         return umMapper.toOut(record);
     }
 

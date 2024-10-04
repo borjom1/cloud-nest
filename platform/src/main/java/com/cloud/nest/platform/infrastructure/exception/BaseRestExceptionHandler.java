@@ -1,6 +1,7 @@
 package com.cloud.nest.platform.infrastructure.exception;
 
 import com.cloud.nest.platform.model.ApiError;
+import com.cloud.nest.platform.model.exception.DataNotFoundException;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.log4j.Log4j2;
@@ -18,8 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static java.util.stream.Collectors.toMap;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
 @Log4j2
 public class BaseRestExceptionHandler {
@@ -38,6 +38,14 @@ public class BaseRestExceptionHandler {
     public ApiError handleIllegalArgumentError(@NotNull ServletWebRequest webRequest, @NotNull IllegalArgumentException e) {
         log.error("Handle illegal argument error: {}", e.getMessage());
         return createDefaultError(e.getMessage(), webRequest, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataNotFoundException.class)
+    @ResponseStatus(NOT_FOUND)
+    @NotNull
+    public ApiError handleDataNotFoundError(@NotNull ServletWebRequest webRequest, @NotNull DataNotFoundException e) {
+        log.error("Handle data not found error: {}", e.getMessage());
+        return createDefaultError(e.getMessage(), webRequest, NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -74,12 +82,12 @@ public class BaseRestExceptionHandler {
     }
 
     @NotNull
-    private static ApiError createDefaultError(String errorMessage, ServletWebRequest webRequest, HttpStatus status) {
+    protected static ApiError createDefaultError(String errorMessage, ServletWebRequest webRequest, HttpStatus status) {
         return createDefaultError(errorMessage, null, webRequest, status);
     }
 
     @NotNull
-    private static ApiError createDefaultError(
+    protected static ApiError createDefaultError(
             @Nullable String errorMessage,
             @Nullable Object details,
             @NotNull ServletWebRequest webRequest,

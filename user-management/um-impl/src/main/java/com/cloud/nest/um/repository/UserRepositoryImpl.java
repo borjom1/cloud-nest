@@ -20,7 +20,7 @@ import static org.springframework.transaction.annotation.Propagation.MANDATORY;
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
 
-    private static final String CREATE_USER_ERROR = "Cannot create user with id = %s";
+    private static final String CREATE_USER_ERROR = "Cannot create user: %s";
     private static final String UPDATE_USER_ERROR = "Cannot update user with id = %s";
 
     private final DSLContext dsl;
@@ -33,12 +33,14 @@ public class UserRepositoryImpl implements UserRepository {
             if (isNew) {
                 Long id = dsl.insertInto(USER)
                         .columns(
-                                USER.USERNAME, USER.FIRST_NAME, USER.LAST_NAME,
-                                USER.PASSWORD, USER.CREATED, USER.UPDATED
+                                USER.USERNAME, USER.EMAIL, USER.FIRST_NAME,
+                                USER.LAST_NAME, USER.COUNTRY, USER.CREATED,
+                                USER.UPDATED
                         )
                         .values(
-                                record.getUsername(), record.getFirstName(), record.getLastName(),
-                                record.getPassword(), record.getCreated(), record.getUpdated()
+                                record.getUsername(), record.getEmail(), record.getFirstName(),
+                                record.getLastName(), record.getCountry(), record.getCreated(),
+                                record.getUpdated()
                         )
                         .returning(USER.ID)
                         .fetchOne(USER.ID);
@@ -48,7 +50,7 @@ public class UserRepositoryImpl implements UserRepository {
             }
         } catch (DataAccessException e) {
             String errorMessage = isNew
-                    ? CREATE_USER_ERROR.formatted(record.getId())
+                    ? CREATE_USER_ERROR.formatted(record)
                     : UPDATE_USER_ERROR.formatted(record.getId());
             throw new TransactionFailedException(errorMessage, e);
         }
