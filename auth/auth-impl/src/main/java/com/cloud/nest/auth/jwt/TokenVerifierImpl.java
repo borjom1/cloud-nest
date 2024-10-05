@@ -5,7 +5,9 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.cloud.nest.auth.model.Token;
+import com.cloud.nest.auth.model.AccessToken;
+import com.cloud.nest.auth.model.RefreshToken;
+import com.cloud.nest.auth.model.TokenAuthority;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotNull;
 
@@ -27,12 +29,29 @@ public class TokenVerifierImpl implements TokenVerifier {
     }
 
     @Override
-    public Token verifyAccessToken(String accessToken) {
+    public AccessToken verifyAccessToken(String accessToken) {
+        return getTokenPayload(accessToken, AccessToken.class);
+    }
+
+    @Override
+    public RefreshToken verifyRefreshToken(String refreshToken) {
+        final RefreshToken token = getTokenPayload(refreshToken, RefreshToken.class);
+        if (!token.getAuthorities().contains(TokenAuthority.REFRESH)) {
+            throw new IllegalArgumentException("Refresh authority is missing");
+        }
+        return token;
+    }
+
+    @NotNull
+    private <T> T getTokenPayload(String jwt, Class<T> payloadType) {
         try {
-            final DecodedJWT decodedJWT = jwtVerifier.verify(accessToken);
-            return objectMapper.readValue(Base64.getDecoder().decode(decodedJWT.getPayload()), Token.class);
+            final DecodedJWT decodedJWT = jwtVerifier.verify(jwt);
+            return objectMapper.readValue(
+                    Base64.getDecoder().decode(decodedJWT.getPayload()),
+                    payloadType
+            );
         } catch (IOException e) {
-            throw new IllegalArgumentException("Cannot parse access token payload", e);
+            throw new IllegalArgumentException("Cannot parse token payload", e);
         } catch (JWTVerificationException e) {
             throw new IllegalArgumentException(e.getMessage());
         }

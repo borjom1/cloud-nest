@@ -7,7 +7,6 @@ import com.cloud.nest.auth.repository.UserRoleRepository;
 import com.cloud.nest.db.auth.tables.records.UserRecord;
 import com.cloud.nest.db.auth.tables.records.UserRoleRecord;
 import com.cloud.nest.platform.model.auth.UserRole;
-import com.cloud.nest.platform.model.exception.DataNotFoundException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;

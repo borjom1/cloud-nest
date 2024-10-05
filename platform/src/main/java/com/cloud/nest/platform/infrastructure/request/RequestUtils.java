@@ -1,12 +1,17 @@
 package com.cloud.nest.platform.infrastructure.request;
 
 import com.cloud.nest.platform.model.request.ClientRequestDetails;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.experimental.UtilityClass;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @UtilityClass
 public class RequestUtils {
@@ -29,6 +34,14 @@ public class RequestUtils {
                 getClientIpAddress(request),
                 getUserAgent(request)
         );
+    }
+
+    @NotNull
+    public static List<Cookie> getRequestCookies() {
+        final HttpServletRequest request = getServletRequestAttributes().getRequest();
+        return request.getCookies() == null
+                ? Collections.emptyList()
+                : Arrays.stream(request.getCookies()).toList();
     }
 
     @NotNull

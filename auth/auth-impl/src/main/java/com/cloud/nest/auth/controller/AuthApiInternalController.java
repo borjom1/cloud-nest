@@ -5,6 +5,7 @@ import com.cloud.nest.auth.inout.NewAuthUserIn;
 import com.cloud.nest.auth.inout.SessionOut;
 import com.cloud.nest.auth.service.AuthorizationService;
 import com.cloud.nest.auth.service.UserService;
+import com.cloud.nest.platform.infrastructure.request.RequestUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ public class AuthApiInternalController implements AuthApiInternal {
     @PostMapping
     @Override
     public CompletableFuture<SessionOut> authorize(@RequestHeader(AUTHORIZATION) String bearerToken) {
-        return completedFuture(authorizationService.authorize(bearerToken));
+        return completedFuture(authorizationService.authorize(bearerToken, RequestUtils.getRequestClientDetails()));
     }
 
 }

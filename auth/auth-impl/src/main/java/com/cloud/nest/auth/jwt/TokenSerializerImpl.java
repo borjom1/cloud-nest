@@ -2,7 +2,7 @@ package com.cloud.nest.auth.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.cloud.nest.auth.model.Token;
+import com.cloud.nest.auth.model.AccessToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,7 +27,7 @@ public class TokenSerializerImpl implements TokenSerializer {
 
     @NotBlank
     @Override
-    public String serializeToken(@NotNull Token token) {
+    public String serializeToken(@NotNull AccessToken token) {
         return JWT.create()
                 .withPayload(toJson(objectMapper, token))
                 .sign(algorithm);

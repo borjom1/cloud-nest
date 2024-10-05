@@ -48,7 +48,6 @@ public class SessionRepositoryImpl implements SessionRepository {
                 SESSION,
                 SESSION.CLIENT_IP.eq(clientIp)
                         .and(SESSION.STATUS.equalIgnoreCase(SessionStatus.ACTIVE.name()))
-                        .or(SESSION.EXPIRES_AT.greaterOrEqual(LocalDateTime.now()))
         );
     }
 

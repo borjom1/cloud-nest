@@ -1,14 +1,14 @@
 package com.cloud.nest.auth.service;
 
+import com.cloud.nest.auth.exception.AuthError;
+import com.cloud.nest.auth.exception.AuthException;
 import com.cloud.nest.auth.inout.SessionStatus;
 import com.cloud.nest.auth.jwt.JwtProperties;
 import com.cloud.nest.auth.jwt.TokenSerializer;
-import com.cloud.nest.auth.model.SessionProperties;
-import com.cloud.nest.auth.model.Token;
-import com.cloud.nest.auth.model.TokenAuthority;
-import com.cloud.nest.auth.model.TokenSession;
+import com.cloud.nest.auth.model.*;
 import com.cloud.nest.auth.repository.SessionRepository;
 import com.cloud.nest.db.auth.tables.records.SessionRecord;
+import com.cloud.nest.platform.model.request.ClientRequestDetails;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -22,21 +22,23 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+
+import static com.cloud.nest.auth.inout.SessionStatus.ACTIVE;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Log4j2
 @Service
 @RequiredArgsConstructor
 public class SessionService {
 
+    private final UserService userService;
     private final JwtProperties jwtProperties;
     private final TokenSerializer tokenSerializer;
     private final SessionRepository sessionRepository;
     private final TransactionTemplate transactionTemplate;
 
-    @Scheduled(fixedRate = 30L, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedRateString = "${security.jwt.session-cleanup-interval}", timeUnit = MINUTES)
     void cleanUpExpiredSessions() {
         transactionTemplate.executeWithoutResult(ts -> {
             final int deletedSessions = sessionRepository.deleteExpiredSessions();
@@ -64,7 +66,7 @@ public class SessionService {
         final SessionRecord record = buildSessionRecord(sessionProperties, now, expiresAt);
         sessionRepository.insert(record);
 
-        final ImmutablePair<Token, Token> tokens = createTokens(record);
+        final ImmutablePair<AccessToken, RefreshToken> tokens = createTokens(record, sessionProperties.requestDetails());
         final String serializedAccessToken = tokenSerializer.serializeToken(tokens.getLeft());
         final String serializedRefreshToken = tokenSerializer.serializeToken(tokens.getRight());
 
@@ -76,21 +78,58 @@ public class SessionService {
                 .build();
     }
 
+    @Transactional
+    @NotNull
+    public TokenSession refreshSession(@NotNull RefreshToken refreshToken, @NotNull ClientRequestDetails requestDetails) {
+        if (!refreshToken.getAuthorities().contains(TokenAuthority.REFRESH)) {
+            throw new AuthException(AuthError.INVALID_CREDENTIALS);
+        }
+
+        if (!refreshToken.getClientIp().equals(requestDetails.clientIp())) {
+            throw new AuthException(AuthError.SESSION_MISMATCH);
+        }
+
+        final SessionRecord sessionRecord = sessionRepository.findById(refreshToken.getSubject());
+        if (isSessionActive(sessionRecord)) {
+            sessionRecord.setStatus(SessionStatus.DISABLED.name());
+            sessionRepository.update(sessionRecord);
+        } else if (userService.getUserByUsername(refreshToken.getSubjectV2()).isEmpty()) {
+            throw new AuthException(AuthError.REFRESH_NOT_AVAILABLE);
+        }
+
+        return createSession(
+                SessionProperties.builder()
+                        .username(refreshToken.getSubjectV2())
+                        .requestDetails(requestDetails)
+                        .build()
+        );
+    }
+
+    public boolean isSessionActive(@Nullable SessionRecord sessionRecord) {
+        return sessionRecord != null && sessionRecord.getStatus().equals(SessionStatus.ACTIVE.name());
+    }
+
     /**
      * @return Pair of access token as the left value, and refresh token as the right value
      */
     @NotNull
-    private ImmutablePair<Token, Token> createTokens(@NotNull SessionRecord record) {
-        final Token accessToken = Token.builder()
+    private ImmutablePair<AccessToken, RefreshToken> createTokens(
+            @NotNull SessionRecord record,
+            @NotNull ClientRequestDetails requestDetails
+    ) {
+        final AccessToken accessToken = AccessToken.builder()
                 .subject(record.getId())
                 .issuer(jwtProperties.getIssuer())
                 .issuedAt(record.getCreated().atZone(ZoneId.systemDefault()).toInstant())
                 .expireAt(record.getExpiresAt().atZone(ZoneId.systemDefault()).toInstant())
-                .authorities(Collections.emptyList())
+                .authorities(Collections.emptySet())
                 .build();
 
-        final Token refreshToken = accessToken.withExpireAt(accessToken.issuedAt().plus(jwtProperties.getRefreshTtl()))
-                .withAuthorities(List.of(TokenAuthority.REFRESH));
+        final RefreshToken refreshToken = RefreshToken.of(accessToken);
+        refreshToken.setSubjectV2(record.getUsername());
+        refreshToken.setClientIp(requestDetails.clientIp());
+        refreshToken.setExpireAt(accessToken.getIssuedAt().plus(jwtProperties.getRefreshTtl()));
+        refreshToken.getAuthorities().add(TokenAuthority.REFRESH);
 
         return ImmutablePair.of(accessToken, refreshToken);
     }
@@ -109,7 +148,7 @@ public class SessionService {
         record.setUserAgent(sessionProperties.requestDetails().clientAgent());
 
         record.setUsername(sessionProperties.username());
-        record.setStatus(SessionStatus.ACTIVE.name());
+        record.setStatus(ACTIVE.name());
 
         record.setLastActive(now);
         record.setCreated(now);
@@ -118,5 +157,4 @@ public class SessionService {
 
         return record;
     }
-
 }

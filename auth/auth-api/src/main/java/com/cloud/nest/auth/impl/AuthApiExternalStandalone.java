@@ -1,9 +1,10 @@
 package com.cloud.nest.auth.impl;
 
 import com.cloud.nest.auth.AuthApiExternal;
-import com.cloud.nest.auth.inout.UserAuthIn;
 import com.cloud.nest.auth.inout.AccessTokenOut;
+import com.cloud.nest.auth.inout.UserAuthIn;
 import com.cloud.nest.platform.infrastructure.response.ComplexResponse;
+import jakarta.servlet.http.Cookie;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
 public class AuthApiExternalStandalone implements AuthApiExternal {
 
     public static final String BASE_URL = "/external/v1/auth";
+    public static final String URL_REFRESH = "/refresh";
 
     private final WebClient webClient;
 
@@ -35,6 +37,11 @@ public class AuthApiExternalStandalone implements AuthApiExternal {
                         )
                 )
                 .toFuture();
+    }
+
+    @Override
+    public CompletableFuture<ComplexResponse<AccessTokenOut>> refreshSession(Cookie refreshCookie) {
+        return null;
     }
 
 }

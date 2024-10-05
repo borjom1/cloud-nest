@@ -7,10 +7,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.ResponseCookie;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.util.Collection;
-import java.util.List;
 
 @AllArgsConstructor
 @Getter
@@ -21,11 +21,19 @@ public class ComplexResponse<T> {
     @Nullable
     private T responseBody;
 
+    @NotNull
     private Collection<ResponseCookie> cookies;
 
     @NotNull
+    public static <T> ComplexResponse<T> of(T body) {
+        return of(body, new LinkedMultiValueMap<>());
+    }
+
+    @NotNull
     public static <T> ComplexResponse<T> of(T body, @NotNull ResponseCookie cookie) {
-        return new ComplexResponse<>(body, List.of(cookie));
+        final var multiValueMap = new LinkedMultiValueMap<String, ResponseCookie>();
+        multiValueMap.add(cookie.getName(), cookie);
+        return of(body, multiValueMap);
     }
 
     @NotNull
