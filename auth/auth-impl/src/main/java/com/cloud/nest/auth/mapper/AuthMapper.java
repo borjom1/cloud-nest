@@ -1,7 +1,7 @@
 package com.cloud.nest.auth.mapper;
 
 import com.cloud.nest.auth.inout.NewAuthUserIn;
-import com.cloud.nest.auth.inout.SessionOut;
+import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import com.cloud.nest.db.auth.tables.records.SessionRecord;
 import com.cloud.nest.db.auth.tables.records.UserRecord;
 import org.mapstruct.InjectionStrategy;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AuthMapper {
 
-    SessionOut toOut(SessionRecord record);
+    UserAuthSession toOut(SessionRecord record);
 
     @Mapping(target = "created", source = "dateTime")
     @Mapping(target = "updated", source = "dateTime")

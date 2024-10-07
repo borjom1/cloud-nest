@@ -3,7 +3,7 @@ package com.cloud.nest.auth.service;
 import com.cloud.nest.auth.exception.AuthError;
 import com.cloud.nest.auth.exception.AuthException;
 import com.cloud.nest.auth.inout.AccessTokenOut;
-import com.cloud.nest.auth.inout.SessionOut;
+import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import com.cloud.nest.auth.jwt.TokenVerifier;
 import com.cloud.nest.auth.mapper.AuthMapper;
 import com.cloud.nest.auth.model.AccessToken;
@@ -35,7 +35,7 @@ public class AuthorizationService {
 
     @Transactional
     @NotNull
-    public SessionOut authorize(@NotBlank String bearerToken, @NotNull ClientRequestDetails requestDetails) {
+    public UserAuthSession authorize(@NotBlank String bearerToken, @NotNull ClientRequestDetails requestDetails) {
         final String accessToken = BearerUtils.removeBearerPrefix(bearerToken);
         final AccessToken token = tokenVerifier.verifyAccessToken(accessToken);
         final SessionRecord sessionRecord = sessionService.findById(token.getSubject());

@@ -17,6 +17,7 @@ import java.util.List;
 public class RequestUtils {
 
     public static final String X_FORWARDED_FOR = "X-Forwarded-For";
+    public static final String USER_SESSION_HEADER = "X-User-Session";
 
     public static String getClientIpAddress(@NotNull HttpServletRequest request) {
         final String ipAddress = request.getHeader(X_FORWARDED_FOR);

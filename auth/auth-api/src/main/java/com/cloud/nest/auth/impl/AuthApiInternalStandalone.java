@@ -2,8 +2,9 @@ package com.cloud.nest.auth.impl;
 
 import com.cloud.nest.auth.AuthApiInternal;
 import com.cloud.nest.auth.inout.NewAuthUserIn;
-import com.cloud.nest.auth.inout.SessionOut;
+import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import com.cloud.nest.platform.infrastructure.auth.BearerUtils;
+import com.cloud.nest.platform.infrastructure.request.RequestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -34,12 +35,13 @@ public class AuthApiInternalStandalone implements AuthApiInternal {
     }
 
     @Override
-    public CompletableFuture<SessionOut> authorize(final String accessToken) {
+    public CompletableFuture<UserAuthSession> authorize(final String accessToken, final String clientIp) {
         return webClient.post()
                 .uri(BASE_URL)
                 .header(HttpHeaders.AUTHORIZATION, BearerUtils.addBearerPrefix(accessToken))
+                .header(RequestUtils.X_FORWARDED_FOR, clientIp)
                 .retrieve()
-                .bodyToMono(SessionOut.class)
+                .bodyToMono(UserAuthSession.class)
                 .toFuture();
     }
 

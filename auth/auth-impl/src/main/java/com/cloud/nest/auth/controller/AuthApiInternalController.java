@@ -2,7 +2,7 @@ package com.cloud.nest.auth.controller;
 
 import com.cloud.nest.auth.AuthApiInternal;
 import com.cloud.nest.auth.inout.NewAuthUserIn;
-import com.cloud.nest.auth.inout.SessionOut;
+import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import com.cloud.nest.auth.service.AuthorizationService;
 import com.cloud.nest.auth.service.UserService;
 import com.cloud.nest.platform.infrastructure.request.RequestUtils;
@@ -14,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.cloud.nest.auth.impl.AuthApiInternalStandalone.BASE_URL;
 import static com.cloud.nest.auth.impl.AuthApiInternalStandalone.URL_USERS;
+import static com.cloud.nest.platform.infrastructure.request.RequestUtils.X_FORWARDED_FOR;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -34,7 +35,10 @@ public class AuthApiInternalController implements AuthApiInternal {
 
     @PostMapping
     @Override
-    public CompletableFuture<SessionOut> authorize(@RequestHeader(AUTHORIZATION) String bearerToken) {
+    public CompletableFuture<UserAuthSession> authorize(
+            @RequestHeader(AUTHORIZATION) String bearerToken,
+            @RequestHeader(value = X_FORWARDED_FOR, required = false) String clientIp
+    ) {
         return completedFuture(authorizationService.authorize(bearerToken, RequestUtils.getRequestClientDetails()));
     }
 
