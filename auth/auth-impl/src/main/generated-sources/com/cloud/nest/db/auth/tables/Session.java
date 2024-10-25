@@ -55,7 +55,7 @@ public class Session extends TableImpl<SessionRecord> {
     }
 
     /**
-     * The column <code>auth.session.id</code>.
+     * The column <code>auth.session.sessionId</code>.
      */
     public final TableField<SessionRecord, String> ID = createField(DSL.name("id"), SQLDataType.VARCHAR(36).nullable(false), this, "");
 
@@ -103,6 +103,11 @@ public class Session extends TableImpl<SessionRecord> {
      * The column <code>auth.session.last_active</code>.
      */
     public final TableField<SessionRecord, LocalDateTime> LAST_ACTIVE = createField(DSL.name("last_active"), SQLDataType.LOCALDATETIME(6).nullable(false), this, "");
+
+    /**
+     * The column <code>auth.session.user_id</code>.
+     */
+    public final TableField<SessionRecord, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     private Session(Name alias, Table<SessionRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

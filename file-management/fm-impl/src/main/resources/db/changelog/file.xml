@@ -1,0 +1,40 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="1729616228" author="borjom1">
+        <createTable tableName="file">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="file_id_pkey"/>
+            </column>
+            <column name="s3_object_key" type="varchar(128)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="filename" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ext" type="varchar(8)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="size" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_by" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="file" indexName="file_s3_object_key_idx" unique="true">
+            <column name="s3_object_key"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

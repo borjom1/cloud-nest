@@ -55,7 +55,7 @@ public class User extends TableImpl<UserRecord> {
     }
 
     /**
-     * The column <code>auth.user.id</code>.
+     * The column <code>auth.user.sessionId</code>.
      */
     public final TableField<UserRecord, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false), this, "");
 

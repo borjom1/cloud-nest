@@ -24,6 +24,10 @@ public class RefreshToken extends AccessToken {
     @JsonProperty("sub2")
     private String subjectV2;
 
+    @NotBlank
+    @JsonProperty("sub3")
+    private Long subjectV3;
+
     @NotNull
     public static RefreshToken of(@NotNull AccessToken accessToken) {
         return RefreshToken.builder()

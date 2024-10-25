@@ -93,12 +93,13 @@ public class SessionService {
         if (isSessionActive(sessionRecord)) {
             sessionRecord.setStatus(SessionStatus.DISABLED.name());
             sessionRepository.update(sessionRecord);
-        } else if (userService.getUserByUsername(refreshToken.getSubjectV2()).isEmpty()) {
+        } else if (userService.getById(refreshToken.getSubjectV3()).isEmpty()) {
             throw new AuthException(AuthError.REFRESH_NOT_AVAILABLE);
         }
 
         return createSession(
                 SessionProperties.builder()
+                        .userId(refreshToken.getSubjectV3())
                         .username(refreshToken.getSubjectV2())
                         .requestDetails(requestDetails)
                         .build()
@@ -127,6 +128,7 @@ public class SessionService {
 
         final RefreshToken refreshToken = RefreshToken.of(accessToken);
         refreshToken.setSubjectV2(record.getUsername());
+        refreshToken.setSubjectV3(record.getUserId());
         refreshToken.setClientIp(requestDetails.clientIp());
         refreshToken.setExpireAt(accessToken.getIssuedAt().plus(jwtProperties.getRefreshTtl()));
         refreshToken.getAuthorities().add(TokenAuthority.REFRESH);
@@ -144,6 +146,7 @@ public class SessionService {
 
         final SessionRecord record = new SessionRecord();
         record.setId(sessionId.toString());
+        record.setUserId(sessionProperties.userId());
         record.setClientIp(sessionProperties.requestDetails().clientIp());
         record.setUserAgent(sessionProperties.requestDetails().clientAgent());
 

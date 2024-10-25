@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.cloud.nest'
-version = 'unspecified'
+version = 'SNAPSHOT-1.0'
 
 repositories {
     mavenCentral()

@@ -21,14 +21,14 @@ public class SessionRecord extends UpdatableRecordImpl<SessionRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>auth.session.id</code>.
+     * Setter for <code>auth.session.sessionId</code>.
      */
     public void setId(String value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>auth.session.id</code>.
+     * Getter for <code>auth.session.sessionId</code>.
      */
     public String getId() {
         return (String) get(0);
@@ -160,6 +160,20 @@ public class SessionRecord extends UpdatableRecordImpl<SessionRecord> {
         return (LocalDateTime) get(9);
     }
 
+    /**
+     * Setter for <code>auth.session.user_id</code>.
+     */
+    public void setUserId(Long value) {
+        set(10, value);
+    }
+
+    /**
+     * Getter for <code>auth.session.user_id</code>.
+     */
+    public Long getUserId() {
+        return (Long) get(10);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -183,7 +197,7 @@ public class SessionRecord extends UpdatableRecordImpl<SessionRecord> {
     /**
      * Create a detached, initialised SessionRecord
      */
-    public SessionRecord(String id, String username, String clientIp, String userAgent, String status, String jsonProperties, LocalDateTime created, LocalDateTime updated, LocalDateTime expiresAt, LocalDateTime lastActive) {
+    public SessionRecord(String id, String username, String clientIp, String userAgent, String status, String jsonProperties, LocalDateTime created, LocalDateTime updated, LocalDateTime expiresAt, LocalDateTime lastActive, Long userId) {
         super(Session.SESSION);
 
         setId(id);
@@ -196,6 +210,7 @@ public class SessionRecord extends UpdatableRecordImpl<SessionRecord> {
         setUpdated(updated);
         setExpiresAt(expiresAt);
         setLastActive(lastActive);
+        setUserId(userId);
         resetChangedOnNotNull();
     }
 }

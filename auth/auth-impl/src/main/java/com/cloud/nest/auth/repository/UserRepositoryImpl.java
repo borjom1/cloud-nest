@@ -25,7 +25,7 @@ public class UserRepositoryImpl implements UserRepository {
         try {
             dsl.executeInsert(record);
         } catch (DataAccessException e) {
-            throw new TransactionFailedException("Cannot insert user with id = %d".formatted(record.getId()), e);
+            throw new TransactionFailedException("Cannot insert user with sessionId = %d".formatted(record.getId()), e);
         }
     }
 
@@ -41,6 +41,15 @@ public class UserRepositoryImpl implements UserRepository {
     public UserRecord findByUsername(String username) {
         return dsl.selectFrom(USER)
                 .where(USER.USERNAME.equalIgnoreCase(username))
+                .fetchOne();
+    }
+
+    @Transactional(propagation = MANDATORY, readOnly = true)
+    @Nullable
+    @Override
+    public UserRecord findById(Long id) {
+        return dsl.selectFrom(USER)
+                .where(USER.ID.eq(id))
                 .fetchOne();
     }
 

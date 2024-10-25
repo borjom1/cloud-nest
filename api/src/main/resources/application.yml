@@ -23,6 +23,9 @@ spring:
       x-forwarded:
         for-append: false
 
+  codec:
+    max-in-memory-size: 250MB
+
 logging:
   level:
     org:

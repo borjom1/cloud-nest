@@ -1,0 +1,33 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="1729798585" author="borjom1">
+        <createTable tableName="user_storage">
+            <column name="user_id" type="bigint" autoIncrement="false">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_rating_user_id_pkey"/>
+            </column>
+            <column name="storage_space" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="used_storage_space" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_downloaded_bytes" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_uploaded_bytes" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="disabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

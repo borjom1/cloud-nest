@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AuthMapper {
 
+    @Mapping(target = "sessionId", source = "id")
     UserAuthSession toOut(SessionRecord record);
 
     @Mapping(target = "created", source = "dateTime")

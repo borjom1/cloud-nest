@@ -29,7 +29,7 @@ public class UserService {
     @Transactional
     public void saveUser(@NotNull NewAuthUserIn in) {
         if (userRepository.existsById(in.userId())) {
-            throw new IllegalArgumentException("User with id [%d] already exists".formatted(in.userId()));
+            throw new IllegalArgumentException("User with sessionId [%d] already exists".formatted(in.userId()));
         }
 
         final LocalDateTime now = LocalDateTime.now();
@@ -45,9 +45,16 @@ public class UserService {
         userRoleRepository.insert(userRoleRecord);
     }
 
+    @Transactional(readOnly = true)
     @NotNull
-    public Optional<UserRecord> getUserByUsername(@NotBlank String username) {
+    public Optional<UserRecord> getByUsername(@NotBlank String username) {
         return Optional.ofNullable(userRepository.findByUsername(username));
+    }
+
+    @Transactional(readOnly = true)
+    @NotNull
+    public Optional<UserRecord> getById(Long userId) {
+        return Optional.ofNullable(userRepository.findById(userId));
     }
 
 }

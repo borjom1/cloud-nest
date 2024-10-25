@@ -11,4 +11,7 @@ public interface UserRepository {
 
     @Nullable
     UserRecord findByUsername(String username);
+
+    @Nullable
+    UserRecord findById(Long id);
 }

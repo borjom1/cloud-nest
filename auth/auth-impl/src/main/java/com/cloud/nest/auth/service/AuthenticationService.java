@@ -7,6 +7,7 @@ import com.cloud.nest.auth.inout.UserAuthIn;
 import com.cloud.nest.auth.model.SessionProperties;
 import com.cloud.nest.auth.model.TokenSession;
 import com.cloud.nest.auth.utils.CookieUtils;
+import com.cloud.nest.db.auth.tables.records.UserRecord;
 import com.cloud.nest.platform.infrastructure.response.ComplexResponse;
 import com.cloud.nest.platform.model.request.ClientRequestDetails;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static com.cloud.nest.auth.impl.AuthApiExternalStandalone.BASE_URL;
 import static com.cloud.nest.auth.impl.AuthApiExternalStandalone.URL_REFRESH;
@@ -36,19 +39,18 @@ public class AuthenticationService {
             throw new AuthException(AuthError.SESSION_EXISTS);
         }
 
-        userService.getUserByUsername(in.username()).ifPresentOrElse(
-                foundUserRecord -> {
-                    if (!passwordEncoder.matches(in.password(), foundUserRecord.getPassword())) {
-                        throw new AuthException(AuthError.INVALID_CREDENTIALS);
-                    }
-                },
-                () -> {
-                    throw new AuthException(AuthError.INVALID_CREDENTIALS);
-                }
-        );
+        final Optional<UserRecord> optUserRecord = userService.getByUsername(in.username());
+        if (optUserRecord.isEmpty()) {
+            throw new AuthException(AuthError.INVALID_CREDENTIALS);
+        }
+
+        if (!passwordEncoder.matches(in.password(), optUserRecord.get().getPassword())) {
+            throw new AuthException(AuthError.INVALID_CREDENTIALS);
+        }
 
         final TokenSession tokenSession = sessionService.createSession(
                 SessionProperties.builder()
+                        .userId(optUserRecord.get().getId())
                         .username(in.username())
                         .requestDetails(requestDetails)
                         .build()

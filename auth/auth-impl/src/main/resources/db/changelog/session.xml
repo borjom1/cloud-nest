@@ -45,4 +45,11 @@
         </createIndex>
     </changeSet>
     
+    <changeSet id="1729538503" author="borjom1">
+        <addColumn tableName="session">
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
