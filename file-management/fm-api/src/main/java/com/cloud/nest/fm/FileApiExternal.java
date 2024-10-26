@@ -1,5 +1,6 @@
 package com.cloud.nest.fm;
 
+import com.cloud.nest.fm.inout.UploadedFileOut;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,5 +10,5 @@ public interface FileApiExternal {
 
     String PARAM_FILE = "file";
 
-    Long uploadFile(UserAuthSession session, MultipartFile... files);
+    UploadedFileOut uploadFile(UserAuthSession session, MultipartFile... files);
 }

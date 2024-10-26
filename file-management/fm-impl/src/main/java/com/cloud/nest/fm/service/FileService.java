@@ -1,6 +1,7 @@
 package com.cloud.nest.fm.service;
 
 import com.cloud.nest.db.fm.tables.records.FileRecord;
+import com.cloud.nest.fm.inout.UploadedFileOut;
 import com.cloud.nest.fm.mapper.FileRecordMapper;
 import com.cloud.nest.fm.persistence.repository.FileRepository;
 import com.cloud.nest.fm.persistence.s3.S3FileStorage;
@@ -29,7 +30,8 @@ public class FileService {
     private final FileRecordMapper fileRecordMapper;
 
     @Transactional
-    public long uploadFile(@NotNull Long userId, @NotNull MultipartFile file) {
+    public UploadedFileOut uploadFile(@NotNull Long userId, @NotNull MultipartFile file) {
+        userStorageService.createUserStorageIfNeeded(userId);
         userStorageService.checkUserStorage(userId, file.getSize());
 
         final String filename = file.getOriginalFilename() != null
@@ -57,7 +59,7 @@ public class FileService {
                 now
         );
         fileRepository.save(fileRecord);
-        return fileRecord.getId();
+        return fileRecordMapper.toUploadedOut(fileRecord);
     }
 
 }

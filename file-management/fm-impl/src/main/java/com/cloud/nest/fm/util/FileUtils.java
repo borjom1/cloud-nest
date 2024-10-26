@@ -16,6 +16,9 @@ public class FileUtils {
     @NotNull
     public static Filename2Ext getFilenameAndExt(@NotNull String filename) {
         final int separatorIdx = filename.lastIndexOf(EXT_SEPARATOR);
+        if (separatorIdx == -1) {
+            return new Filename2Ext(filename, null);
+        }
         return new Filename2Ext(
                 filename.substring(0, separatorIdx),
                 filename.substring(separatorIdx + 1)

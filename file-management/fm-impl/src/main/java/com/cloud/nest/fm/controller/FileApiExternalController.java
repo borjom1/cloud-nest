@@ -1,6 +1,7 @@
 package com.cloud.nest.fm.controller;
 
 import com.cloud.nest.fm.FileApiExternal;
+import com.cloud.nest.fm.inout.UploadedFileOut;
 import com.cloud.nest.fm.service.FileService;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class FileApiExternalController implements FileApiExternal {
     @PostMapping
     @ResponseStatus(CREATED)
     @Override
-    public Long uploadFile(
+    public UploadedFileOut uploadFile(
             @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
             @RequestPart(PARAM_FILE) MultipartFile... files
     ) {

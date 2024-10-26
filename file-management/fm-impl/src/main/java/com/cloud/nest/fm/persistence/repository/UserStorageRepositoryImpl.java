@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static com.cloud.nest.db.fm.Tables.USER_STORAGE;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
@@ -50,11 +49,17 @@ public class UserStorageRepositoryImpl implements UserStorageRepository {
 
     @Transactional(propagation = MANDATORY, readOnly = true)
     @Override
-    public Optional<UserStorageRecord> findByUserId(Long userId) {
-        return Optional.ofNullable(
-                dsl.selectFrom(USER_STORAGE)
-                        .where(USER_STORAGE.USER_ID.eq(userId))
-                        .fetchOne()
-        );
+    public UserStorageRecord findByUserIdForUpdate(Long userId) {
+        return dsl.selectFrom(USER_STORAGE)
+                .where(USER_STORAGE.USER_ID.eq(userId))
+                .forUpdate()
+                .fetchOne();
     }
+
+    @Transactional(propagation = MANDATORY, readOnly = true)
+    @Override
+    public boolean existsByUserId(Long userId) {
+        return dsl.fetchExists(USER_STORAGE, USER_STORAGE.USER_ID.eq(userId));
+    }
+
 }

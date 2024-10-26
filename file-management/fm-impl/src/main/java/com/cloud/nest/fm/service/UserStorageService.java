@@ -21,7 +21,7 @@ public class UserStorageService {
 
     @Transactional
     public void checkUserStorage(@NotNull Long userId, @NotNull Long uploadingFileSize) {
-        final UserStorageRecord record = findOrCreateUserStorage(userId);
+        final UserStorageRecord record = userStorageRepository.findByUserIdForUpdate(userId);
         if (record.getDisabled()) {
             throw new OperationNotAllowedException("File upload is not allowed");
         }
@@ -39,14 +39,10 @@ public class UserStorageService {
     }
 
     @NotNull
-    public UserStorageRecord findOrCreateUserStorage(@NotNull Long userId) {
-        return userStorageRepository
-                .findByUserId(userId)
-                .orElseGet(() -> createUserStorageRecord(userId));
-    }
-
-    @NotNull
-    private UserStorageRecord createUserStorageRecord(@NotNull Long userId) {
+    public void createUserStorageIfNeeded(@NotNull Long userId) {
+        if (userStorageRepository.existsByUserId(userId)) {
+            return;
+        }
         final LocalDateTime now = LocalDateTime.now();
 
         final var record = new UserStorageRecord();
@@ -62,7 +58,6 @@ public class UserStorageService {
         record.setTotalDownloadedBytes(0L);
 
         userStorageRepository.insert(record);
-        return record;
     }
 
 }
