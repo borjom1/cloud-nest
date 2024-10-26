@@ -13,12 +13,8 @@ public class S3FileNaming {
     private static final String FILES_PREFIX = SEPARATOR + "files";
 
     @NotBlank
-    public String getObjectKey(@NotNull Long userId, @NotNull String ext) {
-        final String objectKeyPrefix = FILES_PREFIX + SEPARATOR + userId + SEPARATOR;
-        final String newFilename =  ext.isBlank()
-                ? UUID.randomUUID().toString()
-                : "%s.%s".formatted(UUID.randomUUID(), ext);
-        return objectKeyPrefix + newFilename;
+    public String getObjectKey(@NotNull Long userId) {
+        return FILES_PREFIX + SEPARATOR + userId + SEPARATOR + UUID.randomUUID();
     }
 
 }

@@ -37,4 +37,12 @@
             <column name="s3_object_key"/>
         </createIndex>
     </changeSet>
+    
+    <changeSet id="1729933071" author="borjom1">
+        <addColumn tableName="file">
+            <column name="content_type" type="varchar(128)" defaultValue="application/octet-stream">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

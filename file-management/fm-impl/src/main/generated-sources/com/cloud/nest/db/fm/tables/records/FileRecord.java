@@ -146,6 +146,20 @@ public class FileRecord extends UpdatableRecordImpl<FileRecord> {
         return (LocalDateTime) get(8);
     }
 
+    /**
+     * Setter for <code>fm.file.content_type</code>.
+     */
+    public void setContentType(String value) {
+        set(9, value);
+    }
+
+    /**
+     * Getter for <code>fm.file.content_type</code>.
+     */
+    public String getContentType() {
+        return (String) get(9);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -169,7 +183,7 @@ public class FileRecord extends UpdatableRecordImpl<FileRecord> {
     /**
      * Create a detached, initialised FileRecord
      */
-    public FileRecord(Long id, String s3ObjectKey, String filename, String ext, Long size, Long uploadedBy, Boolean deleted, LocalDateTime created, LocalDateTime updated) {
+    public FileRecord(Long id, String s3ObjectKey, String filename, String ext, Long size, Long uploadedBy, Boolean deleted, LocalDateTime created, LocalDateTime updated, String contentType) {
         super(File.FILE);
 
         setId(id);
@@ -181,6 +195,7 @@ public class FileRecord extends UpdatableRecordImpl<FileRecord> {
         setDeleted(deleted);
         setCreated(created);
         setUpdated(updated);
+        setContentType(contentType);
         resetChangedOnNotNull();
     }
 }

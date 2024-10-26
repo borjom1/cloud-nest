@@ -15,7 +15,7 @@ public record UserIn(
 
         @NotBlank
         @Pattern(
-                regexp = CONTAINS_ONLY_LETTERS,
+                regexp = ONLY_LETTERS,
                 message = "can only contain letters"
         )
         @Length(min = 3, max = 32)
@@ -23,7 +23,7 @@ public record UserIn(
 
         @NotBlank
         @Pattern(
-                regexp = CONTAINS_ONLY_LETTERS,
+                regexp = ONLY_LETTERS,
                 message = "can only contain letters"
         )
         @Length(min = 3, max = 32)

@@ -8,9 +8,9 @@ import java.util.Map;
 
 public interface S3FileStorage {
 
-    String FILENAME_META = "X-Amz-Meta-Filename";
-    String FILE_EXT_META = "X-Amz-Meta-Ext";
-    String AUTHOR_USER_ID = "X-Amz-Meta-Author_user_id";
+    String FILENAME_META = "X-Amz-Init-Meta-Filename";
+    String FILE_EXT_META = "X-Amz-Init-Meta-Ext";
+    String AUTHOR_USER_ID = "X-Amz-Init-Meta-Author_User_Id";
 
     @NotBlank
     String uploadFile(
@@ -18,5 +18,4 @@ public interface S3FileStorage {
             @NotNull MultipartFile file,
             @NotNull Map<String, String> metadata
     );
-
 }

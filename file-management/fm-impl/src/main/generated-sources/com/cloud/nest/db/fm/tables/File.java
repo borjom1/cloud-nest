@@ -100,6 +100,11 @@ public class File extends TableImpl<FileRecord> {
      */
     public final TableField<FileRecord, LocalDateTime> UPDATED = createField(DSL.name("updated"), SQLDataType.LOCALDATETIME(6).nullable(false), this, "");
 
+    /**
+     * The column <code>fm.file.content_type</code>.
+     */
+    public final TableField<FileRecord, String> CONTENT_TYPE = createField(DSL.name("content_type"), SQLDataType.VARCHAR(128).nullable(false).defaultValue(DSL.field(DSL.raw("'application/octet-stream'::character varying"), SQLDataType.VARCHAR)), this, "");
+
     private File(Name alias, Table<FileRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

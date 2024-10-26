@@ -8,6 +8,7 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,16 +41,14 @@ public class MinIOS3FileStorage implements S3FileStorage {
             @NotNull Map<String, String> metadata
     ) {
         ensureBucketExists();
-        final String filename = metadata.get(S3FileStorage.FILENAME_META);
-        final String ext = metadata.get(S3FileStorage.FILE_EXT_META);
-        final String s3ObjectKey = objectKeyCreator.getObjectKey(userId, ext);
+        final String s3ObjectKey = objectKeyCreator.getObjectKey(userId);
 
         try {
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(bucketName)
                             .object(s3ObjectKey)
-                            .contentType(file.getContentType())
+                            .contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE)
                             .userMetadata(metadata)
                             .stream(file.getInputStream(), file.getSize(), partSize)
                             .build()
@@ -57,7 +56,11 @@ public class MinIOS3FileStorage implements S3FileStorage {
             return s3ObjectKey;
         } catch (Exception e) {
             throw new UnexpectedException(
-                    "Cannot upload file [%s.%s] to bucket [%s]".formatted(filename, ext, bucketName),
+                    "Cannot upload file [%s.%s] to bucket [%s]".formatted(
+                            metadata.get(S3FileStorage.FILENAME_META),
+                            metadata.get(S3FileStorage.FILE_EXT_META),
+                            bucketName
+                    ),
                     e
             );
         }

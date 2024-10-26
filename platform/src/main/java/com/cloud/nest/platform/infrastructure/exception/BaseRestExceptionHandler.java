@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -37,6 +38,17 @@ public class BaseRestExceptionHandler {
     @NotNull
     public ApiError handleIllegalArgumentError(@NotNull ServletWebRequest webRequest, @NotNull IllegalArgumentException e) {
         log.error("Handle illegal argument error: {}", e.getMessage());
+        return createDefaultError(e.getMessage(), webRequest, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(BAD_REQUEST)
+    @NotNull
+    public ApiError handleMissingRequestParameterError(
+            @NotNull ServletWebRequest webRequest,
+            @NotNull MissingServletRequestParameterException e
+    ) {
+        log.error("Handle missing request parameter error: {}", e.getMessage());
         return createDefaultError(e.getMessage(), webRequest, BAD_REQUEST);
     }
 

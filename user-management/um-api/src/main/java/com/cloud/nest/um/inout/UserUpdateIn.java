@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.extern.jackson.Jacksonized;
 import org.hibernate.validator.constraints.Length;
 
-import static com.cloud.nest.platform.model.validation.CommonPattern.CONTAINS_ONLY_LETTERS;
+import static com.cloud.nest.platform.model.validation.CommonPattern.ONLY_LETTERS;
 
 @Jacksonized
 @Builder
@@ -14,7 +14,7 @@ public record UserUpdateIn(
 
         @NotBlank
         @Pattern(
-                regexp = CONTAINS_ONLY_LETTERS,
+                regexp = ONLY_LETTERS,
                 message = "can only contain letters"
         )
         @Length(min = 3, max = 32)
@@ -22,7 +22,7 @@ public record UserUpdateIn(
 
         @NotBlank
         @Pattern(
-                regexp = CONTAINS_ONLY_LETTERS,
+                regexp = ONLY_LETTERS,
                 message = "can only contain letters"
         )
         @Length(min = 3, max = 32)

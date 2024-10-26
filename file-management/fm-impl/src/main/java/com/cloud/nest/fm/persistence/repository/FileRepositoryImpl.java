@@ -2,7 +2,6 @@ package com.cloud.nest.fm.persistence.repository;
 
 import com.cloud.nest.db.fm.tables.records.FileRecord;
 import com.cloud.nest.platform.model.exception.TransactionFailedException;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -12,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 import static com.cloud.nest.db.fm.Tables.FILE;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
@@ -59,12 +60,24 @@ public class FileRepositoryImpl implements FileRepository {
     }
 
     @Transactional(propagation = MANDATORY, readOnly = true)
-    @Nullable
     @Override
-    public FileRecord findById(Long id) {
+    public Optional<FileRecord> findById(Long id) {
+        return Optional.ofNullable(
+                dsl.selectFrom(FILE)
+                        .where(FILE.ID.eq(id))
+                        .fetchOne()
+        );
+    }
+
+    @Transactional(propagation = MANDATORY, readOnly = true)
+    @Override
+    public List<FileRecord> findAllByUserId(Long userId, int offset, int limit) {
         return dsl.selectFrom(FILE)
-                .where(FILE.ID.eq(id))
-                .fetchOne();
+                .where(FILE.UPLOADED_BY.eq(userId))
+                .orderBy(FILE.CREATED.desc())
+                .offset(offset)
+                .limit(limit)
+                .fetchInto(FileRecord.class);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.cloud.nest.fm.mapper;
 
 import com.cloud.nest.db.fm.tables.records.FileRecord;
+import com.cloud.nest.fm.inout.FileOut;
 import com.cloud.nest.fm.inout.UploadedFileOut;
 import com.cloud.nest.fm.util.FileUtils.Filename2Ext;
 import org.mapstruct.InjectionStrategy;
@@ -22,10 +23,13 @@ public interface FileRecordMapper {
             Long userId,
             Filename2Ext filename2Ext,
             long size,
+            String contentType,
             boolean deleted,
             LocalDateTime dateTime
     );
 
     UploadedFileOut toUploadedOut(FileRecord record);
+
+    FileOut toOut(FileRecord record);
 
 }
