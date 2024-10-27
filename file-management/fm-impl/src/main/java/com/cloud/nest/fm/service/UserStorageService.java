@@ -46,6 +46,14 @@ public class UserStorageService {
         userStorageRepository.update(record);
     }
 
+    @Transactional
+    public void updateUsedStorage(@NotNull Long userId, @NotNull Long fileSize) {
+        createUserStorageIfNeeded(userId);
+        final UserStorageRecord record = userStorageRepository.findByUserIdForUpdate(userId);
+        record.setUsedStorageSpace(record.getUsedStorageSpace() - fileSize);
+        userStorageRepository.update(record);
+    }
+
     @NotNull
     public void createUserStorageIfNeeded(@NotNull Long userId) {
         if (userStorageRepository.existsByUserId(userId)) {

@@ -36,6 +36,8 @@ public interface FileApiExternal {
 
     CompletableFuture<Void> updateFileMeta(UserAuthSession session, Long id, FileMetaIn in);
 
+    CompletableFuture<Void> deleteFile(UserAuthSession session, Long id);
+
     CompletableFuture<List<FileOut>> getFiles(UserAuthSession session, int offset, int limit);
 
     CompletableFuture<SharedFileOut> shareFile(UserAuthSession session, Long id, SharedFileIn in);

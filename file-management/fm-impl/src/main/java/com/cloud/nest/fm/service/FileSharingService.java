@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static com.cloud.nest.fm.FileApiExternal.URL_FILES;
 import static com.cloud.nest.fm.FileApiExternal.URL_SHARES;
+import static java.time.LocalDateTime.now;
 import static java.util.Comparator.comparing;
 
 @Service
@@ -83,7 +84,7 @@ public class FileSharingService {
 
     @Transactional
     public void deactivateSharedFile(@NotNull SharedFileRecord record) {
-        record.setExpiresAt(LocalDateTime.now().minusYears(10L));
+        record.setExpiresAt(now().minusYears(10L));
         sharedFileRepository.update(record);
     }
 
@@ -110,9 +111,14 @@ public class FileSharingService {
                 .toList();
     }
 
+    @Transactional
+    public void deactivateAllSharesByFileId(@NotNull Long fileId) {
+        sharedFileRepository.updateExpirationForAllNotExpiredByFileId(fileId, now().minusYears(10L));
+    }
+
     @NotNull
     private SharedFileRecord createSharedFileRecord(@NotNull FileRecord fileRecord, @NotNull SharedFileIn in) {
-        final var now = LocalDateTime.now();
+        final var now = now();
         final var sharedFileRecord = new SharedFileRecord();
 
         sharedFileRecord.setId(UUID.randomUUID());
@@ -140,5 +146,4 @@ public class FileSharingService {
                 .link(URL_FILES + URL_SHARES + "/" + sharedFileRecord.getId())
                 .build();
     }
-
 }

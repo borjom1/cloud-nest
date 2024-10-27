@@ -82,6 +82,23 @@ public class MinIOS3FileStorage implements S3FileStorage {
         }
     }
 
+    @Override
+    public void deleteFile(@NotBlank String s3ObjectKey) {
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(s3ObjectKey)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new UnexpectedException(
+                    "Cannot delete uploaded file with object key [%s]".formatted(s3ObjectKey),
+                    e
+            );
+        }
+    }
+
     private void ensureBucketExists() {
         try {
             if (!minioClient.bucketExists(

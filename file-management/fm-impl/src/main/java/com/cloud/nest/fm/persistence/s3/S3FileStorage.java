@@ -25,4 +25,6 @@ public interface S3FileStorage {
 
     @NotNull
     InputStream downloadFileByObjectKey(@NotBlank String s3ObjectKey);
+
+    void deleteFile(@NotBlank String s3ObjectKey);
 }

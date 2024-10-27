@@ -9,6 +9,7 @@ import org.jooq.exception.DataAccessException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -84,6 +85,17 @@ public class SharedFileRepositoryImpl implements SharedFileRepository {
                         SHARED_FILE.EXPIRES_AT.greaterOrEqual(now()).or(SHARED_FILE.EXPIRES_AT.isNull())
                 ))
                 .fetchInto(SharedFileRecord.class);
+    }
+
+    @Transactional(propagation = MANDATORY)
+    @Override
+    public void updateExpirationForAllNotExpiredByFileId(Long fileId, @NotNull LocalDateTime expiresAt) {
+        dsl.update(SHARED_FILE)
+                .set(SHARED_FILE.EXPIRES_AT, expiresAt)
+                .where(SHARED_FILE.FILE_ID.eq(fileId).and(
+                        SHARED_FILE.EXPIRES_AT.greaterOrEqual(now()).or(SHARED_FILE.EXPIRES_AT.isNull())
+                ))
+                .execute();
     }
 
     @Transactional(propagation = MANDATORY, readOnly = true)

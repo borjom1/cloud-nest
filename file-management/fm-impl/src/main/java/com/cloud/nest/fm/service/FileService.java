@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static com.cloud.nest.fm.service.FileSharingService.SHARED_FILE_NOT_FOUND;
 import static com.cloud.nest.fm.util.FileUtils.getFilenameAndExt;
@@ -92,6 +93,18 @@ public class FileService {
         fileRecord.setExt(in.ext());
         fileRecord.setContentType(getMediaTypeForFileExtension(in.ext()).toString());
         fileRepository.save(fileRecord);
+    }
+
+    @Transactional
+    public void deleteFile(@NotNull Long userId, @NotNull Long fileId) {
+        final FileRecord fileRecord = getUserFile(userId, fileId);
+        fileRecord.setDeleted(true);
+        fileRepository.save(fileRecord);
+
+        fileSharingService.deactivateAllSharesByFileId(fileId);
+        userStorageService.updateUsedStorage(userId, fileRecord.getSize());
+
+        CompletableFuture.runAsync(() -> fileStorage.deleteFile(fileRecord.getS3ObjectKey()));
     }
 
     @Transactional(readOnly = true)
@@ -185,7 +198,7 @@ public class FileService {
     private FileRecord getUserFile(Long userId, Long fileId) {
         return fileRepository.findById(fileId)
                 .map(foundRecord -> {
-                    if (!isUserFile(userId, foundRecord)) {
+                    if (foundRecord.getDeleted() || !isUserFile(userId, foundRecord)) {
                         throw new DataNotFoundException(FILE_NOT_FOUND_ERROR.formatted(fileId));
                     }
                     return foundRecord;

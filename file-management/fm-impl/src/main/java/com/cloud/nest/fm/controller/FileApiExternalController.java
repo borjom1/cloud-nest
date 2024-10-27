@@ -27,8 +27,7 @@ import static com.cloud.nest.fm.FileApiExternal.URL_EXTERNAL;
 import static com.cloud.nest.fm.FileApiExternal.URL_FILES;
 import static com.cloud.nest.platform.infrastructure.request.RequestUtils.USER_SESSION_HEADER;
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequestMapping(URL_EXTERNAL + URL_FILES)
@@ -64,6 +63,17 @@ public class FileApiExternalController implements FileApiExternal {
             @Valid @RequestBody FileMetaIn in
     ) {
         fileService.updateFileMeta(session.userId(), id, in);
+        return completedFuture(null);
+    }
+
+    @DeleteMapping(PATH_ID)
+    @ResponseStatus(ACCEPTED)
+    @Override
+    public CompletableFuture<Void> deleteFile(
+            @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
+            @PathVariable(PARAM_ID) Long id
+    ) {
+        fileService.deleteFile(session.userId(), id);
         return completedFuture(null);
     }
 

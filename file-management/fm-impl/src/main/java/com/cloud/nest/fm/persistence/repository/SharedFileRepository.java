@@ -3,6 +3,7 @@ package com.cloud.nest.fm.persistence.repository;
 import com.cloud.nest.db.fm.tables.records.SharedFileRecord;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,6 +19,8 @@ public interface SharedFileRepository {
 
     @NotNull
     List<SharedFileRecord> findAllNotExpiredByFileId(Long fileId);
+
+    void updateExpirationForAllNotExpiredByFileId(Long fileId, @NotNull LocalDateTime expiresAt);
 
     long countNotExpiredSharesByFileId(Long fileId);
 }
