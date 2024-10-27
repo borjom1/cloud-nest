@@ -9,12 +9,12 @@ import org.jooq.exception.DataAccessException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static com.cloud.nest.db.fm.Tables.SHARED_FILE;
+import static java.time.LocalDateTime.now;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
 
 @Repository
@@ -40,7 +40,7 @@ public class SharedFileRepositoryImpl implements SharedFileRepository {
     @Override
     public void update(@NotNull SharedFileRecord record) {
         try {
-            record.setUpdated(LocalDateTime.now());
+            record.setUpdated(now());
             dsl.executeUpdate(record);
         } catch (DataAccessException e) {
             throw new TransactionFailedException(
@@ -52,10 +52,25 @@ public class SharedFileRepositoryImpl implements SharedFileRepository {
 
     @Transactional(propagation = MANDATORY, readOnly = true)
     @Override
-    public Optional<SharedFileRecord> findById(UUID uuid) {
+    public Optional<SharedFileRecord> findNotExpiredById(UUID uuid) {
+        return Optional.ofNullable(
+                dsl.selectFrom(SHARED_FILE)
+                        .where(SHARED_FILE.ID.eq(uuid).and(
+                                SHARED_FILE.EXPIRES_AT
+                                        .greaterOrEqual(now())
+                                        .or(SHARED_FILE.EXPIRES_AT.isNull())
+                        ))
+                        .fetchOne()
+        );
+    }
+
+    @Transactional(propagation = MANDATORY)
+    @Override
+    public Optional<SharedFileRecord> findByIdForUpdate(UUID uuid) {
         return Optional.ofNullable(
                 dsl.selectFrom(SHARED_FILE)
                         .where(SHARED_FILE.ID.eq(uuid))
+                        .forUpdate()
                         .fetchOne()
         );
     }
@@ -63,10 +78,24 @@ public class SharedFileRepositoryImpl implements SharedFileRepository {
     @Transactional(propagation = MANDATORY, readOnly = true)
     @NotNull
     @Override
-    public List<SharedFileRecord> findAllByFileId(Long fileId) {
+    public List<SharedFileRecord> findAllNotExpiredByFileId(Long fileId) {
         return dsl.selectFrom(SHARED_FILE)
-                .where(SHARED_FILE.FILE_ID.eq(fileId))
+                .where(SHARED_FILE.FILE_ID.eq(fileId).and(
+                        SHARED_FILE.EXPIRES_AT.greaterOrEqual(now()).or(SHARED_FILE.EXPIRES_AT.isNull())
+                ))
                 .fetchInto(SharedFileRecord.class);
+    }
+
+    @Transactional(propagation = MANDATORY, readOnly = true)
+    @Override
+    public long countNotExpiredSharesByFileId(Long fileId) {
+        final var now = now();
+        return dsl.fetchCount(
+                SHARED_FILE,
+                SHARED_FILE.FILE_ID.eq(fileId).and(
+                        SHARED_FILE.EXPIRES_AT.greaterOrEqual(now).or(SHARED_FILE.EXPIRES_AT.isNull())
+                )
+        );
     }
 
 }

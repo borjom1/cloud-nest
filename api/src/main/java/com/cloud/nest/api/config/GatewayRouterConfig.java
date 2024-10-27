@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class GatewayRouterConfig {
 
     private static final String REGEX_REPLACEMENT = "(?<remaining>.*)";
-    private static final String REPLACEMENT = "/${remaining}";
+    private static final String REPLACEMENT = "/external/${remaining}";
 
     private final AuthorizationGatewayFilter authGatewayFilter;
 
@@ -21,20 +21,21 @@ public class GatewayRouterConfig {
     RouteLocator routeLocator(@NotNull RouteLocatorBuilder builder) {
         return builder.routes()
                 .route("auth", r -> r
-                        .path("/external/v*/auth/**")
+                        .path("/v*/auth/**")
+                        .filters(f -> f.rewritePath("/" + REGEX_REPLACEMENT, REPLACEMENT))
                         .uri("lb://auth-service"))
                 .route("um", r -> r
-                        .path("/um/external/**")
+                        .path("/um/**")
                         .filters(f -> f
                                 .filter(authGatewayFilter)
-                                .rewritePath("/um/" + REGEX_REPLACEMENT, REPLACEMENT))
+                                .rewritePath("/um" + REGEX_REPLACEMENT, REPLACEMENT))
                         .uri("lb://user-management-service")
                 )
                 .route("fm", r -> r
-                        .path("/fm/external/**")
+                        .path("/fm/**")
                         .filters(f -> f
                                 .filter(authGatewayFilter)
-                                .rewritePath("/fm/" + REGEX_REPLACEMENT, REPLACEMENT))
+                                .rewritePath("/fm" + REGEX_REPLACEMENT, REPLACEMENT))
                         .uri("lb://file-management-service"))
                 .build();
     }

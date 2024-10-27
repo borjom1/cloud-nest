@@ -7,11 +7,15 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.LinkedList;
@@ -41,14 +45,19 @@ public class BaseRestExceptionHandler {
         return createDefaultError(e.getMessage(), webRequest, BAD_REQUEST);
     }
 
-    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ExceptionHandler({
+            MissingServletRequestParameterException.class,
+            MethodArgumentTypeMismatchException.class,
+            MultipartException.class,
+            HttpRequestMethodNotSupportedException.class
+    })
     @ResponseStatus(BAD_REQUEST)
     @NotNull
-    public ApiError handleMissingRequestParameterError(
+    public ApiError handleBadRequestError(
             @NotNull ServletWebRequest webRequest,
-            @NotNull MissingServletRequestParameterException e
+            @NotNull Exception e
     ) {
-        log.error("Handle missing request parameter error: {}", e.getMessage());
+        log.error("Handle bad request error: {}", e.getMessage());
         return createDefaultError(e.getMessage(), webRequest, BAD_REQUEST);
     }
 
@@ -57,6 +66,14 @@ public class BaseRestExceptionHandler {
     @NotNull
     public ApiError handleDataNotFoundError(@NotNull ServletWebRequest webRequest, @NotNull DataNotFoundException e) {
         log.error("Handle data not found error: {}", e.getMessage());
+        return createDefaultError(e.getMessage(), webRequest, NOT_FOUND);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(NOT_FOUND)
+    @NotNull
+    public ApiError handleNotFoundResourceError(@NotNull ServletWebRequest webRequest, @NotNull NoResourceFoundException e) {
+        log.error("Handle not found resource error: {}", e.getMessage());
         return createDefaultError(e.getMessage(), webRequest, NOT_FOUND);
     }
 
@@ -105,10 +122,14 @@ public class BaseRestExceptionHandler {
             @NotNull ServletWebRequest webRequest,
             @NotNull HttpStatus status
     ) {
+        String requestURI = webRequest.getRequest().getRequestURI();
+        if (requestURI.startsWith("/external")) {
+            requestURI = requestURI.replace("/external", "");
+        }
         return ApiError.builder()
                 .timestamp(Instant.now())
                 .error(errorMessage)
-                .uri(webRequest.getRequest().getRequestURI())
+                .uri(requestURI)
                 .status(status.value())
                 .details(details)
                 .build();

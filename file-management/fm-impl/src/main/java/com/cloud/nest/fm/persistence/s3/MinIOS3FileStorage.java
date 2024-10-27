@@ -2,16 +2,14 @@ package com.cloud.nest.fm.persistence.s3;
 
 import com.cloud.nest.fm.config.MinIOProperties;
 import com.cloud.nest.platform.model.exception.UnexpectedException;
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
+import io.minio.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.Map;
 
 @Component
@@ -61,6 +59,24 @@ public class MinIOS3FileStorage implements S3FileStorage {
                             metadata.get(S3FileStorage.FILE_EXT_META),
                             bucketName
                     ),
+                    e
+            );
+        }
+    }
+
+    @NotNull
+    @Override
+    public InputStream downloadFileByObjectKey(@NotBlank String s3ObjectKey) {
+        try {
+            return minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(s3ObjectKey)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new UnexpectedException(
+                    "Cannot download file with object key [%s]".formatted(s3ObjectKey),
                     e
             );
         }

@@ -1,10 +1,15 @@
 package com.cloud.nest.fm.service;
 
 import com.cloud.nest.db.fm.tables.records.FileRecord;
-import com.cloud.nest.fm.inout.FileMetaIn;
-import com.cloud.nest.fm.inout.FileOut;
-import com.cloud.nest.fm.inout.UploadedFileOut;
+import com.cloud.nest.db.fm.tables.records.SharedFileRecord;
+import com.cloud.nest.fm.inout.request.FileMetaIn;
+import com.cloud.nest.fm.inout.request.SharedFileDownloadIn;
+import com.cloud.nest.fm.inout.request.SharedFileIn;
+import com.cloud.nest.fm.inout.response.FileOut;
+import com.cloud.nest.fm.inout.response.SharedFileOut;
+import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.fm.mapper.FileRecordMapper;
+import com.cloud.nest.fm.model.DownloadedFile;
 import com.cloud.nest.fm.persistence.repository.FileRepository;
 import com.cloud.nest.fm.persistence.s3.S3FileStorage;
 import com.cloud.nest.fm.util.FileUtils;
@@ -12,14 +17,20 @@ import com.cloud.nest.fm.util.FileUtils.Filename2Ext;
 import com.cloud.nest.platform.model.exception.DataNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
+import static com.cloud.nest.fm.service.FileSharingService.SHARED_FILE_NOT_FOUND;
 import static com.cloud.nest.fm.util.FileUtils.getFilenameAndExt;
 import static com.cloud.nest.fm.util.MediaTypeMapper.getMediaTypeForFileExtension;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -33,6 +44,7 @@ public class FileService {
     public static final int RECORDS_FETCH_LIMIT = 100;
 
     private final UserStorageService userStorageService;
+    private final FileSharingService fileSharingService;
     private final FileRepository fileRepository;
     private final S3FileStorage fileStorage;
     private final FileRecordMapper fileRecordMapper;
@@ -40,7 +52,7 @@ public class FileService {
     @Transactional
     public UploadedFileOut uploadFile(@NotNull Long userId, @NotNull MultipartFile file) {
         userStorageService.createUserStorageIfNeeded(userId);
-        userStorageService.checkUserStorage(userId, file.getSize());
+        userStorageService.checkUserStorageForUpload(userId, file.getSize());
 
         final String filename = file.getOriginalFilename() != null
                 ? file.getOriginalFilename()
@@ -75,20 +87,11 @@ public class FileService {
 
     @Transactional
     public void updateFileMeta(@NotNull Long userId, @NotNull Long fileId, @NotNull FileMetaIn in) {
-        fileRepository.findById(fileId).ifPresentOrElse(
-                foundRecord -> {
-                    if (!foundRecord.getUploadedBy().equals(userId)) {
-                        throw new DataNotFoundException(FILE_NOT_FOUND_ERROR.formatted(fileId));
-                    }
-                    foundRecord.setFilename(in.filename());
-                    foundRecord.setExt(in.ext());
-                    foundRecord.setContentType(getMediaTypeForFileExtension(in.ext()).toString());
-                    fileRepository.save(foundRecord);
-                },
-                () -> {
-                    throw new DataNotFoundException(FILE_NOT_FOUND_ERROR.formatted(fileId));
-                }
-        );
+        final FileRecord fileRecord = getUserFile(userId, fileId);
+        fileRecord.setFilename(in.filename());
+        fileRecord.setExt(in.ext());
+        fileRecord.setContentType(getMediaTypeForFileExtension(in.ext()).toString());
+        fileRepository.save(fileRecord);
     }
 
     @Transactional(readOnly = true)
@@ -102,4 +105,95 @@ public class FileService {
                 .toList();
     }
 
+    @Transactional
+    public SharedFileOut shareFile(@NotNull Long userId, @NotNull Long fileId, @NotNull SharedFileIn in) {
+        final FileRecord fileRecord = getUserFile(userId, fileId);
+        return fileSharingService.shareFile(fileRecord, in);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SharedFileOut> getAllSharedFilesByFileId(@NotNull Long userId, @NotNull Long fileId) {
+        getUserFile(userId, fileId);
+        return fileSharingService.getAllSharesByFileId(fileId);
+    }
+
+    @Transactional
+    public void deleteSharedFile(@NotNull Long userId, @NotNull UUID shareId) {
+        final SharedFileRecord sharedFileRecord = fileSharingService.getSharedFileByShareId(shareId);
+        final Optional<FileRecord> optFileRecord = fileRepository.findById(sharedFileRecord.getFileId());
+
+        if (optFileRecord.isPresent() && isUserFile(userId, optFileRecord.get())) {
+            fileSharingService.deactivateSharedFile(sharedFileRecord);
+        } else {
+            throw new DataNotFoundException(SHARED_FILE_NOT_FOUND.formatted(shareId));
+        }
+    }
+
+    @Transactional
+    public DownloadedFile downloadFileByShareId(
+            @NotNull Long userId,
+            @NotNull UUID shareId,
+            @NotNull SharedFileDownloadIn in
+    ) {
+        final Long fileId = fileSharingService.getSharedFile(shareId, in);
+        final Optional<FileRecord> optFileRecord = fileRepository.findById(fileId);
+
+        if (optFileRecord.isPresent()) {
+            final FileRecord fileRecord = optFileRecord.get();
+            if (fileRecord.getDeleted()) {
+                throw new DataNotFoundException(SHARED_FILE_NOT_FOUND.formatted(shareId));
+            }
+
+            final InputStream is = fileStorage.downloadFileByObjectKey(fileRecord.getS3ObjectKey());
+
+            fileSharingService.incrementShareDownload(shareId);
+            userStorageService.updateTotalDownloadedBytes(userId, fileRecord.getSize());
+
+            return DownloadedFile.builder()
+                    .name(FileUtils.concatFilenameAndExt(fileRecord.getFilename(), fileRecord.getExt()))
+                    .contentType(MediaType.parseMediaType(fileRecord.getContentType()))
+                    .size(fileRecord.getSize())
+                    .resource(new InputStreamResource(is))
+                    .build();
+        }
+        throw new DataNotFoundException(SHARED_FILE_NOT_FOUND.formatted(shareId));
+    }
+
+    @Transactional
+    public DownloadedFile downloadUserFile(@NotNull Long userId, @NotNull Long fileId) {
+        final Optional<FileRecord> optFileRecord = fileRepository.findById(fileId);
+        if (optFileRecord.isEmpty() ||
+            !isUserFile(userId, optFileRecord.get()) ||
+            optFileRecord.get().getDeleted()
+        ) {
+            throw new DataNotFoundException(FILE_NOT_FOUND_ERROR.formatted(fileId));
+        }
+        final FileRecord fileRecord = optFileRecord.get();
+        final InputStream is = fileStorage.downloadFileByObjectKey(fileRecord.getS3ObjectKey());
+
+        userStorageService.updateTotalDownloadedBytes(userId, fileRecord.getSize());
+
+        return DownloadedFile.builder()
+                .name(FileUtils.concatFilenameAndExt(fileRecord.getFilename(), fileRecord.getExt()))
+                .contentType(MediaType.parseMediaType(fileRecord.getContentType()))
+                .size(fileRecord.getSize())
+                .resource(new InputStreamResource(is))
+                .build();
+    }
+
+    @NotNull
+    private FileRecord getUserFile(Long userId, Long fileId) {
+        return fileRepository.findById(fileId)
+                .map(foundRecord -> {
+                    if (!isUserFile(userId, foundRecord)) {
+                        throw new DataNotFoundException(FILE_NOT_FOUND_ERROR.formatted(fileId));
+                    }
+                    return foundRecord;
+                })
+                .orElseThrow(() -> new DataNotFoundException(FILE_NOT_FOUND_ERROR.formatted(fileId)));
+    }
+
+    private boolean isUserFile(Long userId, @NotNull FileRecord record) {
+        return record.getUploadedBy().equals(userId);
+    }
 }

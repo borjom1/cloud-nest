@@ -73,12 +73,12 @@ public class SharedFile extends TableImpl<SharedFileRecord> {
     /**
      * The column <code>fm.shared_file.password</code>.
      */
-    public final TableField<SharedFileRecord, String> PASSWORD = createField(DSL.name("password"), SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<SharedFileRecord, String> PASSWORD = createField(DSL.name("password"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>fm.shared_file.expires_at</code>.
      */
-    public final TableField<SharedFileRecord, LocalDateTime> EXPIRES_AT = createField(DSL.name("expires_at"), SQLDataType.LOCALDATETIME(6).nullable(false), this, "");
+    public final TableField<SharedFileRecord, LocalDateTime> EXPIRES_AT = createField(DSL.name("expires_at"), SQLDataType.LOCALDATETIME(6), this, "");
 
     /**
      * The column <code>fm.shared_file.created</code>.

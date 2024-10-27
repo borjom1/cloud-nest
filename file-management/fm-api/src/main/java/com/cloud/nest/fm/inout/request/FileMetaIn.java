@@ -1,4 +1,4 @@
-package com.cloud.nest.fm.inout;
+package com.cloud.nest.fm.inout.request;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;

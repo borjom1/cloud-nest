@@ -12,8 +12,12 @@ public interface SharedFileRepository {
 
     void update(@NotNull SharedFileRecord record);
 
-    Optional<SharedFileRecord> findById(UUID uuid);
+    Optional<SharedFileRecord> findNotExpiredById(UUID uuid);
+
+    Optional<SharedFileRecord> findByIdForUpdate(UUID uuid);
 
     @NotNull
-    List<SharedFileRecord> findAllByFileId(Long fileId);
+    List<SharedFileRecord> findAllNotExpiredByFileId(Long fileId);
+
+    long countNotExpiredSharesByFileId(Long fileId);
 }

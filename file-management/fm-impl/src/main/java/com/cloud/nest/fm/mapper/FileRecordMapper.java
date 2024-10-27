@@ -1,8 +1,8 @@
 package com.cloud.nest.fm.mapper;
 
 import com.cloud.nest.db.fm.tables.records.FileRecord;
-import com.cloud.nest.fm.inout.FileOut;
-import com.cloud.nest.fm.inout.UploadedFileOut;
+import com.cloud.nest.fm.inout.response.FileOut;
+import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.fm.util.FileUtils.Filename2Ext;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;

@@ -1,7 +1,8 @@
-package com.cloud.nest.fm.inout;
+package com.cloud.nest.fm.inout.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.Builder;
@@ -13,23 +14,32 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 @Builder
 @Jacksonized
-public record UploadedFileOut(
+public record FileOut(
 
         @NotNull
         Long id,
 
-        @NotNull
+        @NotBlank
         String filename,
 
         @Nullable
         String ext,
 
-        long size,
+        @NotNull
+        Long size,
+
+        @NotNull
+        Boolean deleted,
 
         @NotNull
         @Past
         @JsonFormat(shape = STRING)
-        LocalDateTime created
+        LocalDateTime created,
+
+        @NotNull
+        @Past
+        @JsonFormat(shape = STRING)
+        LocalDateTime updated
 
 ) {
 }

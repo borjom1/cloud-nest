@@ -34,13 +34,14 @@ public class FileRepositoryImpl implements FileRepository {
             if (isNew) {
                 Long id = dsl.insertInto(FILE)
                         .columns(
-                                FILE.S3_OBJECT_KEY, FILE.FILENAME, FILE.EXT, FILE.SIZE,
-                                FILE.UPLOADED_BY, FILE.DELETED, FILE.CREATED, FILE.UPDATED
+                                FILE.S3_OBJECT_KEY, FILE.FILENAME, FILE.EXT,
+                                FILE.SIZE, FILE.UPLOADED_BY, FILE.CONTENT_TYPE,
+                                FILE.DELETED, FILE.CREATED, FILE.UPDATED
                         )
                         .values(
                                 record.getS3ObjectKey(), record.getFilename(), record.getExt(),
-                                record.getSize(), record.getUploadedBy(), record.getDeleted(),
-                                record.getCreated(), record.getUpdated()
+                                record.getSize(), record.getUploadedBy(), record.getContentType(),
+                                record.getDeleted(), record.getCreated(), record.getUpdated()
                         )
                         .returning(FILE.ID)
                         .fetchOne(FILE.ID);

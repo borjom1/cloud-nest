@@ -31,4 +31,9 @@
             <column name="file_id"/>
         </createIndex>
     </changeSet>
+    
+    <changeSet id="1729955767" author="borjom1">
+        <dropNotNullConstraint tableName="shared_file" columnName="expires_at"/>
+        <dropNotNullConstraint tableName="shared_file" columnName="password"/>
+    </changeSet>
 </databaseChangeLog>

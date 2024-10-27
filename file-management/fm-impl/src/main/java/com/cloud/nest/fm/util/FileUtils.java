@@ -1,6 +1,7 @@
 package com.cloud.nest.fm.util;
 
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.With;
 import lombok.experimental.UtilityClass;
@@ -30,6 +31,13 @@ public class FileUtils {
         return filename2Ext
                 .withFilename(StringUtils.truncate(filename2Ext.filename(), MAX_FILENAME_LENGTH))
                 .withExt(StringUtils.truncate(filename2Ext.ext(), MAX_EXTENSION_LENGTH));
+    }
+
+    @NotBlank
+    public static String concatFilenameAndExt(@NotBlank String filename, @Nullable String ext) {
+        return ext == null || ext.isBlank()
+                ? filename
+                : "%s.%s".formatted(filename, ext);
     }
 
     @With

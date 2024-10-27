@@ -20,13 +20,13 @@ public class UserStorageService {
     private final StorageProperties storageProperties;
 
     @Transactional
-    public void checkUserStorage(@NotNull Long userId, @NotNull Long uploadingFileSize) {
+    public void checkUserStorageForUpload(@NotNull Long userId, @NotNull Long uploadedFileSize) {
         final UserStorageRecord record = userStorageRepository.findByUserIdForUpdate(userId);
         if (record.getDisabled()) {
             throw new OperationNotAllowedException("File upload is not allowed");
         }
 
-        final long updatedUsedStorage = record.getUsedStorageSpace() + uploadingFileSize;
+        final long updatedUsedStorage = record.getUsedStorageSpace() + uploadedFileSize;
         if (updatedUsedStorage > record.getStorageSpace()) {
             throw new StorageSpaceLimitExceededException(String.format(
                     "Uploading file exceeds the storage space [%d] bytes",
@@ -34,7 +34,15 @@ public class UserStorageService {
             ));
         }
         record.setUsedStorageSpace(updatedUsedStorage);
-        record.setTotalUploadedBytes(record.getTotalUploadedBytes() + uploadingFileSize);
+        record.setTotalUploadedBytes(record.getTotalUploadedBytes() + uploadedFileSize);
+        userStorageRepository.update(record);
+    }
+
+    @Transactional
+    public void updateTotalDownloadedBytes(@NotNull Long userId, @NotNull Long downloadedFileSize) {
+        createUserStorageIfNeeded(userId);
+        final UserStorageRecord record = userStorageRepository.findByUserIdForUpdate(userId);
+        record.setTotalDownloadedBytes(record.getTotalDownloadedBytes() + downloadedFileSize);
         userStorageRepository.update(record);
     }
 
