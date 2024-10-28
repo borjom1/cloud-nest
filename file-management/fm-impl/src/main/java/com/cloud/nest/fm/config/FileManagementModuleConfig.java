@@ -21,6 +21,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -29,6 +30,7 @@ import javax.sql.DataSource;
 import static java.util.Objects.requireNonNull;
 
 @Configuration
+@EnableScheduling
 @Import(UserManagementApiConfig.class)
 public class FileManagementModuleConfig {
 

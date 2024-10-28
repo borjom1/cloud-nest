@@ -44,3 +44,5 @@ business:
   storage:
     user:
       default-storage-size: 5000000000
+    bin:
+      clear-rate: 30d

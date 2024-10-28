@@ -10,11 +10,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static com.cloud.nest.db.fm.Tables.FILE;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static java.time.LocalDateTime.now;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
 
 @Repository
@@ -47,7 +49,7 @@ public class FileRepositoryImpl implements FileRepository {
                         .fetchOne(FILE.ID);
                 record.setId(id);
             } else {
-                record.setUpdated(LocalDateTime.now());
+                record.setUpdated(now());
                 dsl.executeUpdate(record);
             }
             return record;
@@ -79,6 +81,32 @@ public class FileRepositoryImpl implements FileRepository {
                 .offset(offset)
                 .limit(limit)
                 .fetchInto(FileRecord.class);
+    }
+
+    @Transactional(propagation = MANDATORY, readOnly = true)
+    @Override
+    public List<FileRecord> findAllPlacedToBinByUserId(Long userId, int offset, int limit) {
+        return dsl.selectFrom(FILE)
+                .where(FILE.UPLOADED_BY.eq(userId).and(
+                        FILE.DELETED.eq(FALSE).and(
+                                FILE.PLACED_TO_BIN.isNotNull()
+                        )
+                ))
+                .orderBy(FILE.PLACED_TO_BIN.desc())
+                .offset(offset)
+                .limit(limit)
+                .fetchInto(FileRecord.class);
+    }
+
+    @Transactional(propagation = MANDATORY)
+    @Override
+    public int setDeletedForAllWithPlacedToBinLaterThanDays(long days) {
+        return dsl.update(FILE)
+                .set(FILE.DELETED, TRUE)
+                .where(FILE.PLACED_TO_BIN.lessThan(now().minusDays(days)).and(
+                        FILE.DELETED.eq(FALSE)
+                ))
+                .execute();
     }
 
 }

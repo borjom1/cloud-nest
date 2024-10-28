@@ -160,6 +160,20 @@ public class FileRecord extends UpdatableRecordImpl<FileRecord> {
         return (String) get(9);
     }
 
+    /**
+     * Setter for <code>fm.file.placed_to_bin</code>.
+     */
+    public void setPlacedToBin(LocalDateTime value) {
+        set(10, value);
+    }
+
+    /**
+     * Getter for <code>fm.file.placed_to_bin</code>.
+     */
+    public LocalDateTime getPlacedToBin() {
+        return (LocalDateTime) get(10);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -183,7 +197,7 @@ public class FileRecord extends UpdatableRecordImpl<FileRecord> {
     /**
      * Create a detached, initialised FileRecord
      */
-    public FileRecord(Long id, String s3ObjectKey, String filename, String ext, Long size, Long uploadedBy, Boolean deleted, LocalDateTime created, LocalDateTime updated, String contentType) {
+    public FileRecord(Long id, String s3ObjectKey, String filename, String ext, Long size, Long uploadedBy, Boolean deleted, LocalDateTime created, LocalDateTime updated, String contentType, LocalDateTime placedToBin) {
         super(File.FILE);
 
         setId(id);
@@ -196,6 +210,7 @@ public class FileRecord extends UpdatableRecordImpl<FileRecord> {
         setCreated(created);
         setUpdated(updated);
         setContentType(contentType);
+        setPlacedToBin(placedToBin);
         resetChangedOnNotNull();
     }
 }

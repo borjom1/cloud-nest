@@ -1,6 +1,7 @@
 package com.cloud.nest.fm.mapper;
 
 import com.cloud.nest.db.fm.tables.records.FileRecord;
+import com.cloud.nest.fm.inout.response.FileBinOut;
 import com.cloud.nest.fm.inout.response.FileOut;
 import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.fm.util.FileUtils.Filename2Ext;
@@ -31,5 +32,7 @@ public interface FileRecordMapper {
     UploadedFileOut toUploadedOut(FileRecord record);
 
     FileOut toOut(FileRecord record);
+
+    FileBinOut toBinOut(FileRecord record);
 
 }

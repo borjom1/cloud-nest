@@ -105,6 +105,11 @@ public class File extends TableImpl<FileRecord> {
      */
     public final TableField<FileRecord, String> CONTENT_TYPE = createField(DSL.name("content_type"), SQLDataType.VARCHAR(128).nullable(false).defaultValue(DSL.field(DSL.raw("'application/octet-stream'::character varying"), SQLDataType.VARCHAR)), this, "");
 
+    /**
+     * The column <code>fm.file.placed_to_bin</code>.
+     */
+    public final TableField<FileRecord, LocalDateTime> PLACED_TO_BIN = createField(DSL.name("placed_to_bin"), SQLDataType.LOCALDATETIME(6), this, "");
+
     private File(Name alias, Table<FileRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -141,7 +146,7 @@ public class File extends TableImpl<FileRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.FILE_S3_OBJECT_KEY_IDX);
+        return Arrays.asList(Indexes.FILE_DELETED_IDX, Indexes.FILE_PLACED_TO_BIN_IDX, Indexes.FILE_S3_OBJECT_KEY_IDX);
     }
 
     @Override

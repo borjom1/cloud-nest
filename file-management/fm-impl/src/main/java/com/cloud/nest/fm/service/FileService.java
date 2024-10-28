@@ -39,7 +39,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 @Service
 @RequiredArgsConstructor
-public class FileService {
+public class FileService implements BaseFileService {
 
     public static final String FILE_NOT_FOUND_ERROR = "File with id [%d] not found";
     public static final int RECORDS_FETCH_LIMIT = 100;
@@ -96,6 +96,7 @@ public class FileService {
     }
 
     @Transactional
+    @Override
     public void deleteFile(@NotNull Long userId, @NotNull Long fileId) {
         final FileRecord fileRecord = getUserFile(userId, fileId);
         fileRecord.setDeleted(true);
@@ -108,6 +109,7 @@ public class FileService {
     }
 
     @Transactional(readOnly = true)
+    @Override
     public List<FileOut> getFilesByUserId(@NotNull Long userId, int offset, int limit) {
         if (Math.abs(offset - limit) > RECORDS_FETCH_LIMIT) {
             throw new IllegalArgumentException("Records fetch limit is exceeded");
@@ -194,8 +196,10 @@ public class FileService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     @NotNull
-    private FileRecord getUserFile(Long userId, Long fileId) {
+    @Override
+    public FileRecord getUserFile(Long userId, Long fileId) {
         return fileRepository.findById(fileId)
                 .map(foundRecord -> {
                     if (foundRecord.getDeleted() || !isUserFile(userId, foundRecord)) {
@@ -209,4 +213,5 @@ public class FileService {
     private boolean isUserFile(Long userId, @NotNull FileRecord record) {
         return record.getUploadedBy().equals(userId);
     }
+
 }

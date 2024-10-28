@@ -23,6 +23,8 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index FILE_DELETED_IDX = Internal.createIndex(DSL.name("file_deleted_idx"), File.FILE, new OrderField[] { File.FILE.DELETED }, false);
+    public static final Index FILE_PLACED_TO_BIN_IDX = Internal.createIndex(DSL.name("file_placed_to_bin_idx"), File.FILE, new OrderField[] { File.FILE.PLACED_TO_BIN }, false);
     public static final Index FILE_S3_OBJECT_KEY_IDX = Internal.createIndex(DSL.name("file_s3_object_key_idx"), File.FILE, new OrderField[] { File.FILE.S3_OBJECT_KEY }, true);
     public static final Index SHARED_FILE_FILE_ID_IDX = Internal.createIndex(DSL.name("shared_file_file_id_idx"), SharedFile.SHARED_FILE, new OrderField[] { SharedFile.SHARED_FILE.FILE_ID }, false);
 }

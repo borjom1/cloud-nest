@@ -45,4 +45,18 @@
             </column>
         </addColumn>
     </changeSet>
+    
+    <changeSet id="1730138021" author="borjom1">
+        <addColumn tableName="file">
+            <column name="placed_to_bin" type="datetime"/>
+        </addColumn>
+
+        <createIndex tableName="file" indexName="file_placed_to_bin_idx">
+            <column name="placed_to_bin"/>
+        </createIndex>
+
+        <createIndex tableName="file" indexName="file_deleted_idx">
+            <column name="deleted"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
