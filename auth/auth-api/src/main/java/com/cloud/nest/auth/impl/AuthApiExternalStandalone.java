@@ -14,7 +14,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class AuthApiExternalStandalone implements AuthApiExternal {
 
-    public static final String BASE_URL = "/external/v1/auth";
+    public static final String EXTERNAL = "/external";
+    public static final String BASE_URL = "/v1/auth";
     public static final String URL_REFRESH = "/refresh";
 
     private final WebClient webClient;
@@ -26,7 +27,7 @@ public class AuthApiExternalStandalone implements AuthApiExternal {
     @Override
     public CompletableFuture<ComplexResponse<AccessTokenOut>> authenticateUser(final UserAuthIn in) {
         return webClient.post()
-                .uri(BASE_URL)
+                .uri(EXTERNAL + BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(in))
                 .exchangeToMono(clientResponse -> Mono.just(

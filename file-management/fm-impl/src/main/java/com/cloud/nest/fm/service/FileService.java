@@ -159,7 +159,7 @@ public class FileService implements BaseFileService {
                 throw new DataNotFoundException(SHARED_FILE_NOT_FOUND.formatted(shareId));
             }
 
-            final InputStream is = fileStorage.downloadFileByObjectKey(fileRecord.getS3ObjectKey());
+            final InputStream is = fileStorage.downloadFile(fileRecord.getS3ObjectKey());
 
             fileSharingService.incrementShareDownload(shareId);
             userStorageService.updateTotalDownloadedBytes(userId, fileRecord.getSize());
@@ -184,7 +184,7 @@ public class FileService implements BaseFileService {
             throw new DataNotFoundException(FILE_NOT_FOUND_ERROR.formatted(fileId));
         }
         final FileRecord fileRecord = optFileRecord.get();
-        final InputStream is = fileStorage.downloadFileByObjectKey(fileRecord.getS3ObjectKey());
+        final InputStream is = fileStorage.downloadFile(fileRecord.getS3ObjectKey());
 
         userStorageService.updateTotalDownloadedBytes(userId, fileRecord.getSize());
 

@@ -14,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -144,6 +143,7 @@ public class FileSharingService {
                 .created(sharedFileRecord.getCreated())
                 .expiresAt(sharedFileRecord.getExpiresAt())
                 .link(URL_FILES + URL_SHARES + "/" + sharedFileRecord.getId())
+                .downloads(sharedFileRecord.getDownloads())
                 .build();
     }
 }

@@ -66,7 +66,7 @@ public class MinIOS3FileStorage implements S3FileStorage {
 
     @NotNull
     @Override
-    public InputStream downloadFileByObjectKey(@NotBlank String s3ObjectKey) {
+    public InputStream downloadFile(@NotBlank String s3ObjectKey) {
         try {
             return minioClient.getObject(
                     GetObjectArgs.builder()

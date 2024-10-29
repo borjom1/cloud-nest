@@ -2,14 +2,17 @@ package com.cloud.nest.fm.persistence.repository;
 
 import com.cloud.nest.db.fm.tables.records.UserStorageRecord;
 import com.cloud.nest.platform.model.exception.TransactionFailedException;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
+import org.jooq.SelectSeekStep1;
 import org.jooq.exception.DataAccessException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.cloud.nest.db.fm.Tables.USER_STORAGE;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
@@ -60,6 +63,24 @@ public class UserStorageRepositoryImpl implements UserStorageRepository {
     @Override
     public boolean existsByUserId(Long userId) {
         return dsl.fetchExists(USER_STORAGE, USER_STORAGE.USER_ID.eq(userId));
+    }
+
+    @Transactional(propagation = MANDATORY, readOnly = true)
+    @NotNull
+    @Override
+    public List<UserStorageRecord> findAll(@Nullable Long lastUserId, long limit) {
+        SelectSeekStep1<UserStorageRecord, Long> orderedRecords = dsl.selectFrom(USER_STORAGE)
+                .orderBy(USER_STORAGE.USER_ID);
+
+        if (lastUserId == null) {
+            return orderedRecords.limit(limit)
+                    .fetchInto(UserStorageRecord.class);
+        }
+
+        return orderedRecords
+                .seek(lastUserId)
+                .limit(limit)
+                .fetchInto(UserStorageRecord.class);
     }
 
 }

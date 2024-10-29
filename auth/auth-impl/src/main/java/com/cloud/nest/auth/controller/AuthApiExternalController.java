@@ -14,15 +14,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.cloud.nest.auth.impl.AuthApiExternalStandalone.BASE_URL;
-import static com.cloud.nest.auth.impl.AuthApiExternalStandalone.URL_REFRESH;
+import static com.cloud.nest.auth.impl.AuthApiExternalStandalone.*;
 import static com.cloud.nest.auth.utils.CookieUtils.AUTH_REFRESH_COOKIE;
 import static com.cloud.nest.platform.infrastructure.request.RequestUtils.getRequestClientDetails;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
-@RequestMapping(BASE_URL)
+@RequestMapping(EXTERNAL + BASE_URL)
 @RequiredArgsConstructor
 public class AuthApiExternalController implements AuthApiExternal {
 

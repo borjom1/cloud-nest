@@ -1,9 +1,8 @@
 package com.cloud.nest.fm.inout.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import lombok.Builder;
 import lombok.extern.jackson.Jacksonized;
 
@@ -13,24 +12,28 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 @Builder
 @Jacksonized
-public record SharedFileOut(
-
-        @NotBlank
-        String link,
+public record UserReportOut(
 
         @NotNull
-        Boolean password,
-
-        @NotNull
+        @Past
         @JsonFormat(shape = STRING)
-        LocalDateTime created,
-
-        @Nullable
-        @JsonFormat(shape = STRING)
-        LocalDateTime expiresAt,
+        LocalDateTime periodStart,
 
         @NotNull
-        Integer downloads
+        @Past
+        @JsonFormat(shape = STRING)
+        LocalDateTime periodEnd,
+
+        @NotNull
+        Long downloadedBytes,
+
+        @NotNull
+        Long uploadedBytes,
+
+        @NotNull
+        @Past
+        @JsonFormat(shape = STRING)
+        LocalDateTime created
 
 ) {
 }

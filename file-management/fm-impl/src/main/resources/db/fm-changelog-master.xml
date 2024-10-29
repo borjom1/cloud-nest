@@ -5,4 +5,5 @@
     <include file="changelog/file.xml" relativeToChangelogFile="true"/>
     <include file="changelog/user_storage.xml" relativeToChangelogFile="true"/>
     <include file="changelog/shared_file.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/report.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

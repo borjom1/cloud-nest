@@ -31,7 +31,7 @@ public class AuthSecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(c -> c
-                        .requestMatchers(POST, AuthApiExternalStandalone.BASE_URL + "/**").permitAll()
+                        .requestMatchers(POST, "/external" + AuthApiExternalStandalone.BASE_URL + "/**").permitAll()
                         .requestMatchers(POST, AuthApiInternalStandalone.BASE_URL + "/**").permitAll()
                         .requestMatchers(GET, "/actuator/health").permitAll()
                         .anyRequest().authenticated())
