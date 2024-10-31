@@ -11,5 +11,7 @@ public interface UserRepository {
 
     Optional<UserRecord> findById(@Nullable Long id);
 
-    Optional<UserRecord> findByUsername(@Nullable String username);
+    boolean existsByUsername(@Nullable String username);
+
+    boolean existsByEmail(@Nullable String email);
 }

@@ -28,9 +28,14 @@ public class UserApiService {
     @Transactional
     @NotNull
     public UserOut createUser(@NotNull UserIn in) {
-        if (userRepository.findByUsername(in.username()).isPresent()) {
+        if (userRepository.existsByUsername(in.username())) {
             throw new IllegalArgumentException("User with username [%s] exists".formatted(in.username()));
         }
+
+        if (userRepository.existsByEmail(in.email())) {
+            throw new IllegalArgumentException("User with email [%s] exists".formatted(in.email()));
+        }
+
         final UserRecord record = umMapper.toRecord(in, LocalDateTime.now());
         userRepository.save(record);
 

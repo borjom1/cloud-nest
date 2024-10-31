@@ -68,12 +68,14 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Transactional(propagation = MANDATORY, readOnly = true)
     @Override
-    public Optional<UserRecord> findByUsername(@Nullable String username) {
-        return Optional.ofNullable(
-                dsl.selectFrom(USER)
-                        .where(USER.USERNAME.equalIgnoreCase(username))
-                        .fetchOne()
-        );
+    public boolean existsByUsername(@Nullable String username) {
+        return dsl.fetchExists(USER, USER.USERNAME.equalIgnoreCase(username));
+    }
+
+    @Transactional(propagation = MANDATORY, readOnly = true)
+    @Override
+    public boolean existsByEmail(@Nullable String email) {
+        return dsl.fetchExists(USER, USER.EMAIL.equalIgnoreCase(email));
     }
 
 }
