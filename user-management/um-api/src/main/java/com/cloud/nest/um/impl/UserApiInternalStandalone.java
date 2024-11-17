@@ -1,6 +1,7 @@
 package com.cloud.nest.um.impl;
 
 import com.cloud.nest.um.UserApiInternal;
+import com.cloud.nest.um.inout.UserOut;
 import com.cloud.nest.um.inout.UserUpdateIn;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,6 +22,15 @@ public class UserApiInternalStandalone implements UserApiInternal {
 
     public UserApiInternalStandalone(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.build();
+    }
+
+    @Override
+    public CompletableFuture<UserOut> findById(Long id) {
+        return webClient.get()
+                .uri(URL_USERS + PATH_ID, id)
+                .retrieve()
+                .bodyToMono(UserOut.class)
+                .toFuture();
     }
 
     @Override

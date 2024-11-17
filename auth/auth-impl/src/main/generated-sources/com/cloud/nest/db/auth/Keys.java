@@ -5,8 +5,10 @@ package com.cloud.nest.db.auth;
 
 
 import com.cloud.nest.db.auth.tables.Session;
+import com.cloud.nest.db.auth.tables.SessionHistory;
 import com.cloud.nest.db.auth.tables.User;
 import com.cloud.nest.db.auth.tables.UserRole;
+import com.cloud.nest.db.auth.tables.records.SessionHistoryRecord;
 import com.cloud.nest.db.auth.tables.records.SessionRecord;
 import com.cloud.nest.db.auth.tables.records.UserRecord;
 import com.cloud.nest.db.auth.tables.records.UserRoleRecord;
@@ -29,6 +31,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<SessionRecord> SESSION_ID_PKEY = Internal.createUniqueKey(Session.SESSION, DSL.name("session_id_pkey"), new TableField[] { Session.SESSION.ID }, true);
+    public static final UniqueKey<SessionHistoryRecord> SESSION_HISTORY_ID_PKEY = Internal.createUniqueKey(SessionHistory.SESSION_HISTORY, DSL.name("session_history_id_pkey"), new TableField[] { SessionHistory.SESSION_HISTORY.ID }, true);
     public static final UniqueKey<UserRecord> USER_ID_PKEY = Internal.createUniqueKey(User.USER, DSL.name("user_id_pkey"), new TableField[] { User.USER.ID }, true);
     public static final UniqueKey<UserRecord> USER_USERNAME_KEY = Internal.createUniqueKey(User.USER, DSL.name("user_username_key"), new TableField[] { User.USER.USERNAME }, true);
     public static final UniqueKey<UserRoleRecord> USER_ROLE_USER_ID_ROLE_PKEY_CONSTRAINT = Internal.createUniqueKey(UserRole.USER_ROLE, DSL.name("user_role_user_id_role_pkey_constraint"), new TableField[] { UserRole.USER_ROLE.USER_ID, UserRole.USER_ROLE.ROLE }, true);

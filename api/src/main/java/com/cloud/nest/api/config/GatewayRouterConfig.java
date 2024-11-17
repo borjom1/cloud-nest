@@ -21,11 +21,17 @@ public class GatewayRouterConfig {
     @Bean
     RouteLocator routeLocator(@NotNull RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("auth", r -> r
-                        .path("/v*/auth/**")
-                        .filters(f -> f.rewritePath("/" + REGEX_REPLACEMENT, REPLACEMENT))
+                .route("auth-anonymous", r -> r
+                        .path("/auth/v1/security/login", "/auth/v1/security/refresh")
+                        .filters(f -> f.rewritePath("/auth" + REGEX_REPLACEMENT, REPLACEMENT))
                         .uri("lb://auth-service"))
-                .route("um-anon-register", r -> r
+                .route("auth", r -> r
+                        .path("/auth/**")
+                        .filters(f -> f
+                                .filter(authGatewayFilter)
+                                .rewritePath("/auth" + REGEX_REPLACEMENT, REPLACEMENT))
+                        .uri("lb://auth-service"))
+                .route("um-anonymous", r -> r
                         .method(HttpMethod.POST)
                         .and()
                         .path("/um/v1/users")

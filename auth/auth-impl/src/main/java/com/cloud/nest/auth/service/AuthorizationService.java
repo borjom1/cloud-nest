@@ -2,8 +2,7 @@ package com.cloud.nest.auth.service;
 
 import com.cloud.nest.auth.exception.AuthError;
 import com.cloud.nest.auth.exception.AuthException;
-import com.cloud.nest.auth.inout.AccessTokenOut;
-import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
+import com.cloud.nest.auth.inout.response.AccessTokenOut;
 import com.cloud.nest.auth.jwt.TokenVerifier;
 import com.cloud.nest.auth.mapper.AuthMapper;
 import com.cloud.nest.auth.model.AccessToken;
@@ -12,6 +11,7 @@ import com.cloud.nest.auth.model.TokenSession;
 import com.cloud.nest.auth.utils.CookieUtils;
 import com.cloud.nest.db.auth.tables.records.SessionRecord;
 import com.cloud.nest.platform.infrastructure.auth.BearerUtils;
+import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import com.cloud.nest.platform.infrastructure.response.ComplexResponse;
 import com.cloud.nest.platform.model.request.ClientRequestDetails;
 import jakarta.servlet.http.Cookie;
@@ -22,8 +22,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.cloud.nest.auth.impl.AuthApiExternalStandalone.BASE_URL;
-import static com.cloud.nest.auth.impl.AuthApiExternalStandalone.URL_REFRESH;
+import static com.cloud.nest.auth.AuthApiExternal.URL_REFRESH_COOKIE;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +70,7 @@ public class AuthorizationService {
         final TokenSession tokenSession = sessionService.refreshSession(token, clientRequestDetails);
         final ResponseCookie newRefreshCookie = CookieUtils.createRefreshCookie(
                 tokenSession.refreshToken(),
-                BASE_URL + URL_REFRESH,
+                URL_REFRESH_COOKIE,
                 tokenSession.refreshTokenTtl()
         );
 

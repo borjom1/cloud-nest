@@ -1,4 +1,4 @@
-package com.cloud.nest.auth.inout;
+package com.cloud.nest.auth.inout.response;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;

@@ -36,13 +36,4 @@ public class UserApiExternalStandalone implements UserApiExternal {
                 .toFuture();
     }
 
-    @Override
-    public CompletableFuture<UserOut> findById(Long id) {
-        return webClient.get()
-                .uri(URL_USERS + PATH_ID, id)
-                .retrieve()
-                .bodyToMono(UserOut.class)
-                .toFuture();
-    }
-
 }

@@ -21,14 +21,14 @@ public class SessionRecord extends UpdatableRecordImpl<SessionRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>auth.session.sessionId</code>.
+     * Setter for <code>auth.session.id</code>.
      */
     public void setId(String value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>auth.session.sessionId</code>.
+     * Getter for <code>auth.session.id</code>.
      */
     public String getId() {
         return (String) get(0);

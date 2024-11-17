@@ -1,7 +1,7 @@
 package com.cloud.nest.auth.impl;
 
 import com.cloud.nest.auth.AuthApiInternal;
-import com.cloud.nest.auth.inout.NewAuthUserIn;
+import com.cloud.nest.auth.inout.request.NewAuthUserIn;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import com.cloud.nest.platform.infrastructure.auth.BearerUtils;
 import com.cloud.nest.platform.infrastructure.request.RequestUtils;
@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class AuthApiInternalStandalone implements AuthApiInternal {
 
-    public static final String BASE_URL = "/internal/v1/auth";
+    public static final String BASE_URL = "/internal/v1/security";
     public static final String URL_USERS = "/users";
 
     private final WebClient webClient;

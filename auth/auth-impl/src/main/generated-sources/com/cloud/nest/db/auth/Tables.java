@@ -5,6 +5,7 @@ package com.cloud.nest.db.auth;
 
 
 import com.cloud.nest.db.auth.tables.Session;
+import com.cloud.nest.db.auth.tables.SessionHistory;
 import com.cloud.nest.db.auth.tables.User;
 import com.cloud.nest.db.auth.tables.UserRole;
 
@@ -19,6 +20,11 @@ public class Tables {
      * The table <code>auth.session</code>.
      */
     public static final Session SESSION = Session.SESSION;
+
+    /**
+     * The table <code>auth.session_history</code>.
+     */
+    public static final SessionHistory SESSION_HISTORY = SessionHistory.SESSION_HISTORY;
 
     /**
      * The table <code>auth.user</code>.

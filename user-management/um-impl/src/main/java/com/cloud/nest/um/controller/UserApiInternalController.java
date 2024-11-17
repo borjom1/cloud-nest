@@ -1,6 +1,7 @@
 package com.cloud.nest.um.controller;
 
 import com.cloud.nest.um.UserApiInternal;
+import com.cloud.nest.um.inout.UserOut;
 import com.cloud.nest.um.inout.UserUpdateIn;
 import com.cloud.nest.um.service.UserApiService;
 import jakarta.validation.Valid;
@@ -9,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.cloud.nest.um.impl.UserApiInternalStandalone.*;
+import static com.cloud.nest.um.impl.UserApiExternalStandalone.PARAM_ID;
+import static com.cloud.nest.um.impl.UserApiExternalStandalone.PATH_ID;
+import static com.cloud.nest.um.impl.UserApiInternalStandalone.URL_USERS;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
 @RestController
@@ -18,6 +21,12 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 public class UserApiInternalController implements UserApiInternal {
 
     private final UserApiService userApiService;
+
+    @GetMapping(PATH_ID)
+    @Override
+    public CompletableFuture<UserOut> findById(@PathVariable(PARAM_ID) Long id) {
+        return completedFuture(userApiService.findById(id));
+    }
 
     @PatchMapping(PATH_ID)
     @Override

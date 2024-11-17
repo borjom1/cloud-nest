@@ -1,7 +1,7 @@
 package com.cloud.nest.auth.controller;
 
 import com.cloud.nest.auth.AuthApiInternal;
-import com.cloud.nest.auth.inout.NewAuthUserIn;
+import com.cloud.nest.auth.inout.request.NewAuthUserIn;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import com.cloud.nest.auth.service.AuthorizationService;
 import com.cloud.nest.auth.service.UserService;

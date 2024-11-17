@@ -1,6 +1,5 @@
 package com.cloud.nest.auth;
 
-import com.cloud.nest.auth.impl.AuthApiExternalStandalone;
 import com.cloud.nest.auth.impl.AuthApiInternalStandalone;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -18,11 +17,6 @@ public class AuthApiConfig {
     @LoadBalanced
     public WebClient.Builder webClientBuilder() {
         return WebClient.builder().baseUrl(getServiceBaseUrl());
-    }
-
-    @Bean
-    public AuthApiExternal authApiExternal(@Qualifier(WEB_CLIENT) WebClient.Builder webClientBuilder) {
-        return new AuthApiExternalStandalone(webClientBuilder);
     }
 
     @Bean

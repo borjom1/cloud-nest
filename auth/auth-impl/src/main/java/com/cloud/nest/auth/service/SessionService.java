@@ -3,10 +3,14 @@ package com.cloud.nest.auth.service;
 import com.cloud.nest.auth.exception.AuthError;
 import com.cloud.nest.auth.exception.AuthException;
 import com.cloud.nest.auth.inout.SessionStatus;
+import com.cloud.nest.auth.inout.response.SessionHistoryOut;
 import com.cloud.nest.auth.jwt.JwtProperties;
 import com.cloud.nest.auth.jwt.TokenSerializer;
+import com.cloud.nest.auth.mapper.AuthMapper;
 import com.cloud.nest.auth.model.*;
+import com.cloud.nest.auth.repository.SessionHistoryRepository;
 import com.cloud.nest.auth.repository.SessionRepository;
+import com.cloud.nest.db.auth.tables.records.SessionHistoryRecord;
 import com.cloud.nest.db.auth.tables.records.SessionRecord;
 import com.cloud.nest.platform.model.request.ClientRequestDetails;
 import jakarta.annotation.Nullable;
@@ -22,9 +26,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
-import java.util.UUID;
+import java.util.List;
 
-import static com.cloud.nest.auth.inout.SessionStatus.ACTIVE;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Log4j2
@@ -32,10 +35,12 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 @RequiredArgsConstructor
 public class SessionService {
 
+    private final AuthMapper authMapper;
     private final UserService userService;
     private final JwtProperties jwtProperties;
     private final TokenSerializer tokenSerializer;
     private final SessionRepository sessionRepository;
+    private final SessionHistoryRepository sessionHistoryRepository;
     private final TransactionTemplate transactionTemplate;
 
     @Scheduled(fixedRateString = "${security.jwt.session-cleanup-interval}", timeUnit = MINUTES)
@@ -63,10 +68,13 @@ public class SessionService {
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime expiresAt = now.plus(jwtProperties.getAccessTtl());
 
-        final SessionRecord record = buildSessionRecord(sessionProperties, now, expiresAt);
-        sessionRepository.insert(record);
+        final SessionRecord sessionRecord = authMapper.toSessionRecord(sessionProperties, now, expiresAt);
+        sessionRepository.insert(sessionRecord);
 
-        final ImmutablePair<AccessToken, RefreshToken> tokens = createTokens(record, sessionProperties.requestDetails());
+        final SessionHistoryRecord sessionHistoryRecord = authMapper.toSessionHistoryRecord(sessionRecord);
+        sessionHistoryRepository.save(sessionHistoryRecord);
+
+        final ImmutablePair<AccessToken, RefreshToken> tokens = createTokens(sessionRecord, sessionProperties.requestDetails());
         final String serializedAccessToken = tokenSerializer.serializeToken(tokens.getLeft());
         final String serializedRefreshToken = tokenSerializer.serializeToken(tokens.getRight());
 
@@ -106,6 +114,14 @@ public class SessionService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public List<SessionHistoryOut> getSessionHistoryByUserId(Long userId, int offset, int limit) {
+        return sessionHistoryRepository.findAllByUserIdOrderedByCreated(userId, offset, limit)
+                .stream()
+                .map(authMapper::toSessionHistoryOut)
+                .toList();
+    }
+
     public boolean isSessionActive(@Nullable SessionRecord sessionRecord) {
         return sessionRecord != null && sessionRecord.getStatus().equals(SessionStatus.ACTIVE.name());
     }
@@ -136,28 +152,4 @@ public class SessionService {
         return ImmutablePair.of(accessToken, refreshToken);
     }
 
-    @NotNull
-    private SessionRecord buildSessionRecord(
-            SessionProperties sessionProperties,
-            LocalDateTime now,
-            LocalDateTime expiresAt
-    ) {
-        final UUID sessionId = UUID.randomUUID();
-
-        final SessionRecord record = new SessionRecord();
-        record.setId(sessionId.toString());
-        record.setUserId(sessionProperties.userId());
-        record.setClientIp(sessionProperties.requestDetails().clientIp());
-        record.setUserAgent(sessionProperties.requestDetails().clientAgent());
-
-        record.setUsername(sessionProperties.username());
-        record.setStatus(ACTIVE.name());
-
-        record.setLastActive(now);
-        record.setCreated(now);
-        record.setUpdated(now);
-        record.setExpiresAt(expiresAt);
-
-        return record;
-    }
 }

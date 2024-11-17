@@ -5,4 +5,5 @@
     <include file="changelog/user_role.xml" relativeToChangelogFile="true"/>
     <include file="changelog/user.xml" relativeToChangelogFile="true"/>
     <include file="changelog/session.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/session_history.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

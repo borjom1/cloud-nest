@@ -6,6 +6,7 @@ package com.cloud.nest.db.auth;
 
 import com.cloud.nest.db.DefaultCatalog;
 import com.cloud.nest.db.auth.tables.Session;
+import com.cloud.nest.db.auth.tables.SessionHistory;
 import com.cloud.nest.db.auth.tables.User;
 import com.cloud.nest.db.auth.tables.UserRole;
 
@@ -36,6 +37,11 @@ public class Auth extends SchemaImpl {
     public final Session SESSION = Session.SESSION;
 
     /**
+     * The table <code>auth.session_history</code>.
+     */
+    public final SessionHistory SESSION_HISTORY = SessionHistory.SESSION_HISTORY;
+
+    /**
      * The table <code>auth.user</code>.
      */
     public final User USER = User.USER;
@@ -62,6 +68,7 @@ public class Auth extends SchemaImpl {
     public final List<Table<?>> getTables() {
         return Arrays.asList(
             Session.SESSION,
+            SessionHistory.SESSION_HISTORY,
             User.USER,
             UserRole.USER_ROLE
         );

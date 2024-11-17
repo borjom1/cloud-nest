@@ -1,6 +1,6 @@
 package com.cloud.nest.auth.service;
 
-import com.cloud.nest.auth.inout.NewAuthUserIn;
+import com.cloud.nest.auth.inout.request.NewAuthUserIn;
 import com.cloud.nest.auth.mapper.AuthMapper;
 import com.cloud.nest.auth.repository.UserRepository;
 import com.cloud.nest.auth.repository.UserRoleRepository;

@@ -21,14 +21,14 @@ public class UserRecord extends UpdatableRecordImpl<UserRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>auth.user.sessionId</code>.
+     * Setter for <code>auth.user.id</code>.
      */
     public void setId(Long value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>auth.user.sessionId</code>.
+     * Getter for <code>auth.user.id</code>.
      */
     public Long getId() {
         return (Long) get(0);

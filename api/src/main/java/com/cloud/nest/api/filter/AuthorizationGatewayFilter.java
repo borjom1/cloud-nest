@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -84,16 +85,22 @@ public class AuthorizationGatewayFilter implements GatewayFilter {
 
     @NotNull
     private Mono<Void> handleAuthorizationError(@NotNull Throwable err, @NotNull ServerWebExchange exchange) {
-        if (err instanceof WebClientResponseException clientException) {
+        if (err instanceof WebClientResponseException clientEx) {
             ApiError authApiError;
             try {
-                authApiError = objectMapper.readValue(clientException.getResponseBodyAsString(), ApiError.class);
+                authApiError = objectMapper.readValue(clientEx.getResponseBodyAsString(), ApiError.class);
             } catch (JsonProcessingException e) {
                 authApiError = null;
             }
             return sendErrorResponse(
-                    authApiError != null ? authApiError.error() : clientException.getMessage(),
-                    HttpStatus.valueOf(clientException.getStatusCode().value()),
+                    authApiError != null ? authApiError.error() : clientEx.getMessage(),
+                    HttpStatus.valueOf(clientEx.getStatusCode().value()),
+                    exchange
+            );
+        } else if (err instanceof NotFoundException notFoundEx) {
+            return sendErrorResponse(
+                    notFoundEx.getReason(),
+                    HttpStatus.valueOf(notFoundEx.getStatusCode().value()),
                     exchange
             );
         }

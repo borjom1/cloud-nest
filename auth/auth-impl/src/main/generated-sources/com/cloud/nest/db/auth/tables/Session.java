@@ -55,7 +55,7 @@ public class Session extends TableImpl<SessionRecord> {
     }
 
     /**
-     * The column <code>auth.session.sessionId</code>.
+     * The column <code>auth.session.id</code>.
      */
     public final TableField<SessionRecord, String> ID = createField(DSL.name("id"), SQLDataType.VARCHAR(36).nullable(false), this, "");
 

@@ -1,7 +1,7 @@
 package com.cloud.nest.um.service;
 
 import com.cloud.nest.auth.AuthApiInternal;
-import com.cloud.nest.auth.inout.NewAuthUserIn;
+import com.cloud.nest.auth.inout.request.NewAuthUserIn;
 import com.cloud.nest.db.um.tables.records.UserRecord;
 import com.cloud.nest.um.inout.UserIn;
 import com.cloud.nest.um.inout.UserOut;

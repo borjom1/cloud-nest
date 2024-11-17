@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.cloud.nest.um.impl.UserApiExternalStandalone.*;
+import static com.cloud.nest.um.impl.UserApiExternalStandalone.URL_USERS;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.springframework.http.HttpStatus.CREATED;
 
@@ -26,12 +26,6 @@ public class UserApiExternalController implements UserApiExternal {
     @Override
     public CompletableFuture<UserOut> createUser(@Valid @RequestBody UserIn in) {
         return completedFuture(userApiService.createUser(in));
-    }
-
-    @GetMapping(PATH_ID)
-    @Override
-    public CompletableFuture<UserOut> findById(@PathVariable(PARAM_ID) Long id) {
-        return completedFuture(userApiService.findById(id));
     }
 
 }

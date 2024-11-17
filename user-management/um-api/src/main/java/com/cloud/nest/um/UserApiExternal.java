@@ -7,6 +7,4 @@ import java.util.concurrent.CompletableFuture;
 
 public interface UserApiExternal {
     CompletableFuture<UserOut> createUser(UserIn in);
-
-    CompletableFuture<UserOut> findById(Long id);
 }

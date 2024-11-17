@@ -1,6 +1,6 @@
 package com.cloud.nest.auth.config;
 
-import com.cloud.nest.auth.impl.AuthApiExternalStandalone;
+import com.cloud.nest.auth.AuthApiExternal;
 import com.cloud.nest.auth.impl.AuthApiInternalStandalone;
 import com.cloud.nest.auth.jwt.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +31,7 @@ public class AuthSecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(c -> c
-                        .requestMatchers(POST, "/external" + AuthApiExternalStandalone.BASE_URL + "/**").permitAll()
+                        .requestMatchers(AuthApiExternal.BASE_URL + "/**").permitAll()
                         .requestMatchers(POST, AuthApiInternalStandalone.BASE_URL + "/**").permitAll()
                         .requestMatchers(GET, "/actuator/health").permitAll()
                         .anyRequest().authenticated())

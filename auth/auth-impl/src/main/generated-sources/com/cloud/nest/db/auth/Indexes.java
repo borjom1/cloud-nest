@@ -5,6 +5,7 @@ package com.cloud.nest.db.auth;
 
 
 import com.cloud.nest.db.auth.tables.Session;
+import com.cloud.nest.db.auth.tables.SessionHistory;
 import com.cloud.nest.db.auth.tables.User;
 
 import org.jooq.Index;
@@ -24,6 +25,7 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     public static final Index SESSION_CLIENT_IP_IDX = Internal.createIndex(DSL.name("session_client_ip_idx"), Session.SESSION, new OrderField[] { Session.SESSION.CLIENT_IP }, false);
+    public static final Index SESSION_HISTORY_USER_ID_IDX = Internal.createIndex(DSL.name("session_history_user_id_idx"), SessionHistory.SESSION_HISTORY, new OrderField[] { SessionHistory.SESSION_HISTORY.USER_ID }, false);
     public static final Index SESSION_USERNAME_IDX = Internal.createIndex(DSL.name("session_username_idx"), Session.SESSION, new OrderField[] { Session.SESSION.USERNAME }, false);
     public static final Index USER_USERNAME_IDX = Internal.createIndex(DSL.name("user_username_idx"), User.USER, new OrderField[] { User.USER.USERNAME }, true);
 }
