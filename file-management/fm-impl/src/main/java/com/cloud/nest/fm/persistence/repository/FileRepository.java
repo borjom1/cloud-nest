@@ -1,6 +1,7 @@
 package com.cloud.nest.fm.persistence.repository;
 
 import com.cloud.nest.db.fm.tables.records.FileRecord;
+import com.cloud.nest.fm.model.FileSearchCriteria;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public interface FileRepository {
 
     Optional<FileRecord> findById(Long id);
 
-    List<FileRecord> findAllByUserId(Long userId, int offset, int limit);
+    List<FileRecord> findAllByUserId(Long userId, @NotNull FileSearchCriteria criteria, int offset, int limit);
 
     List<FileRecord> findAllPlacedToBinByUserId(Long userId, int offset, int limit);
 

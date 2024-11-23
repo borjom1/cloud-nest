@@ -7,6 +7,11 @@ import com.cloud.nest.fm.inout.response.FileOut;
 import com.cloud.nest.fm.inout.response.SharedFileOut;
 import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
+import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +30,10 @@ public interface FileApiExternal {
 
     String PARAM_FILE = "file";
     String PARAM_ID = "id";
+    String PARAM_FILENAME = "filename";
+    String PARAM_EXT = "ext";
+    String PARAM_MIN_FILE_SIZE = "minFileSize";
+    String PARAM_MAX_FILE_SIZE = "maxFileSize";
     String PARAM_OFFSET = "offset";
     String PARAM_LIMIT = "limit";
 
@@ -32,26 +41,36 @@ public interface FileApiExternal {
 
     String FILENAME_ATTACHMENT = "attachment; filename=%s";
 
+    long TEN_GB_IN_BYTES = 10_000_000_000L;
+
     CompletableFuture<UploadedFileOut> uploadFile(UserAuthSession session, MultipartFile... files);
 
-    CompletableFuture<Void> updateFileMeta(UserAuthSession session, Long id, FileMetaIn in);
+    CompletableFuture<Void> updateFileMeta(UserAuthSession session, @Min(1L) Long id, @Valid FileMetaIn in);
 
-    CompletableFuture<Void> deleteFile(UserAuthSession session, Long id);
+    CompletableFuture<Void> deleteFile(UserAuthSession session, @Min(1L) Long id);
 
-    CompletableFuture<List<FileOut>> getFiles(UserAuthSession session, int offset, int limit);
+    CompletableFuture<List<FileOut>> getFiles(
+            @NotNull UserAuthSession session,
+            @Nullable String filename,
+            @Nullable String extension,
+            @Nullable @Min(0L) @Max(TEN_GB_IN_BYTES) Long minFileSize,
+            @Nullable @Min(0L) @Max(TEN_GB_IN_BYTES) Long maxFileSize,
+            @Min(0) int offset,
+            @Min(0) @Max(500) int limit
+    );
 
-    CompletableFuture<SharedFileOut> shareFile(UserAuthSession session, Long id, SharedFileIn in);
+    CompletableFuture<SharedFileOut> shareFile(UserAuthSession session, @Min(1L) Long id, @Valid SharedFileIn in);
 
-    CompletableFuture<List<SharedFileOut>> getAllSharedFilesByFileId(UserAuthSession session, Long id);
+    CompletableFuture<List<SharedFileOut>> getAllSharedFilesByFileId(UserAuthSession session, @Min(1L) Long id);
 
     CompletableFuture<SharedFileOut> deleteSharedFile(UserAuthSession session, UUID shareId);
 
     CompletableFuture<ResponseEntity<Resource>> downloadFileByShareId(
             UserAuthSession session,
             UUID shareId,
-            SharedFileDownloadIn in
+            @Valid SharedFileDownloadIn in
     );
 
-    CompletableFuture<ResponseEntity<Resource>> downloadOwnFileById(UserAuthSession session, Long id);
+    CompletableFuture<ResponseEntity<Resource>> downloadOwnFileById(UserAuthSession session, @Min(1L) Long id);
 
 }

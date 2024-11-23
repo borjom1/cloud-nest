@@ -8,9 +8,11 @@ import com.cloud.nest.fm.inout.response.FileOut;
 import com.cloud.nest.fm.inout.response.SharedFileOut;
 import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.fm.model.DownloadedFile;
+import com.cloud.nest.fm.model.FileSearchCriteria;
 import com.cloud.nest.fm.service.FileService;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -59,7 +61,7 @@ public class FileApiExternalController implements FileApiExternal {
     @Override
     public CompletableFuture<Void> updateFileMeta(
             @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
-            @PathVariable(PARAM_ID) Long id,
+            @PathVariable(PARAM_ID) @Min(1L) Long id,
             @Valid @RequestBody FileMetaIn in
     ) {
         fileService.updateFileMeta(session.userId(), id, in);
@@ -71,7 +73,7 @@ public class FileApiExternalController implements FileApiExternal {
     @Override
     public CompletableFuture<Void> deleteFile(
             @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
-            @PathVariable(PARAM_ID) Long id
+            @PathVariable(PARAM_ID) @Min(1L) Long id
     ) {
         fileService.deleteFile(session.userId(), id);
         return completedFuture(null);
@@ -81,10 +83,23 @@ public class FileApiExternalController implements FileApiExternal {
     @Override
     public CompletableFuture<List<FileOut>> getFiles(
             @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
+            @RequestParam(value = PARAM_FILENAME, required = false) String filename,
+            @RequestParam(value = PARAM_EXT, required = false) String extension,
+            @RequestParam(value = PARAM_MIN_FILE_SIZE, required = false) Long minFileSize,
+            @RequestParam(value = PARAM_MAX_FILE_SIZE, required = false) Long maxFileSize,
             @RequestParam(PARAM_OFFSET) int offset,
             @RequestParam(PARAM_LIMIT) int limit
     ) {
-        return completedFuture(fileService.getFilesByUserId(session.userId(), offset, limit));
+        return completedFuture(fileService.getFilesByUserId(
+                session.userId(),
+                FileSearchCriteria.builder()
+                        .filename(filename)
+                        .ext(extension)
+                        .minFileSize(minFileSize)
+                        .maxFileSize(maxFileSize)
+                        .build(),
+                offset, limit
+        ));
     }
 
     @PostMapping(PATH_ID + URL_SHARES)
@@ -92,7 +107,7 @@ public class FileApiExternalController implements FileApiExternal {
     @Override
     public CompletableFuture<SharedFileOut> shareFile(
             @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
-            @PathVariable(PARAM_ID) Long id,
+            @PathVariable(PARAM_ID) @Min(1L) Long id,
             @Valid @RequestBody SharedFileIn in
     ) {
         return completedFuture(fileService.shareFile(session.userId(), id, in));
@@ -102,7 +117,7 @@ public class FileApiExternalController implements FileApiExternal {
     @Override
     public CompletableFuture<List<SharedFileOut>> getAllSharedFilesByFileId(
             @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
-            @PathVariable(PARAM_ID) Long id
+            @PathVariable(PARAM_ID) @Min(1L) Long id
     ) {
         return completedFuture(fileService.getAllSharedFilesByFileId(session.userId(), id));
     }
@@ -136,7 +151,7 @@ public class FileApiExternalController implements FileApiExternal {
     @Override
     public CompletableFuture<ResponseEntity<Resource>> downloadOwnFileById(
             @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
-            @PathVariable(PARAM_ID) Long id
+            @PathVariable(PARAM_ID) @Min(1L) Long id
     ) {
         return completedFuture(
                 downloadedFileToResponseEntity(

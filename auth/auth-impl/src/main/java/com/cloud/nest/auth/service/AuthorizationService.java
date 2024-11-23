@@ -22,6 +22,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 import static com.cloud.nest.auth.AuthApiExternal.URL_REFRESH_COOKIE;
 
 @Service
@@ -51,6 +53,8 @@ public class AuthorizationService {
             throw new AuthException(AuthError.SESSION_NOT_ACTIVE);
         }
 
+        sessionRecord.setLastActive(LocalDateTime.now());
+        sessionService.updateSessionRecord(sessionRecord);
         return authMapper.toOut(sessionRecord);
     }
 

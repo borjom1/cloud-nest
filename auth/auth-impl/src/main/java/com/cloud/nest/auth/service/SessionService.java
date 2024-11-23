@@ -126,6 +126,11 @@ public class SessionService {
         return sessionRecord != null && sessionRecord.getStatus().equals(SessionStatus.ACTIVE.name());
     }
 
+    @Transactional
+    public void updateSessionRecord(@NotNull SessionRecord sessionRecord) {
+        sessionRepository.update(sessionRecord);
+    }
+
     /**
      * @return Pair of access token as the left value, and refresh token as the right value
      */
@@ -151,5 +156,4 @@ public class SessionService {
 
         return ImmutablePair.of(accessToken, refreshToken);
     }
-
 }

@@ -10,6 +10,7 @@ import com.cloud.nest.fm.inout.response.SharedFileOut;
 import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.fm.mapper.FileRecordMapper;
 import com.cloud.nest.fm.model.DownloadedFile;
+import com.cloud.nest.fm.model.FileSearchCriteria;
 import com.cloud.nest.fm.persistence.repository.FileRepository;
 import com.cloud.nest.fm.persistence.s3.S3FileStorage;
 import com.cloud.nest.fm.util.FileUtils;
@@ -110,11 +111,15 @@ public class FileService implements BaseFileService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<FileOut> getFilesByUserId(@NotNull Long userId, int offset, int limit) {
+    public List<FileOut> getFilesByUserId(
+            @NotNull Long userId,
+            @NotNull FileSearchCriteria criteria,
+            int offset, int limit
+    ) {
         if (Math.abs(offset - limit) > RECORDS_FETCH_LIMIT) {
             throw new IllegalArgumentException("Records fetch limit is exceeded");
         }
-        return fileRepository.findAllByUserId(userId, offset, limit)
+        return fileRepository.findAllByUserId(userId, criteria, offset, limit)
                 .stream()
                 .map(fileRecordMapper::toOut)
                 .toList();
