@@ -16,9 +16,9 @@ public class JooqQueryFilterTranslatorTest {
 
     private static final JooqQueryFilterTranslator translator = new JooqQueryFilterTranslator();
 
-    @DisplayName("Test filter query translation with timeout")
+    @DisplayName("Test filter query translation")
     @Test
-    void testFilterQueryTranslationWithTimeout() {
+    void testFilterQueryTranslation() {
         final FileFilter filter = FileFilter.builder()
                 .fileName("file")
                 .ext("jpg")
