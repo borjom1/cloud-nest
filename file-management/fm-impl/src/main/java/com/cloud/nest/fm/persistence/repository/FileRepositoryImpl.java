@@ -1,12 +1,11 @@
 package com.cloud.nest.fm.persistence.repository;
 
 import com.cloud.nest.db.fm.tables.records.FileRecord;
-import com.cloud.nest.fm.model.FileSearchCriteria;
+import com.cloud.nest.fm.model.FileFilter;
+import com.cloud.nest.fm.util.filter.JooqQueryFilterTranslator;
 import com.cloud.nest.platform.model.exception.TransactionFailedException;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.exception.DataAccessException;
 import org.springframework.stereotype.Repository;
@@ -30,6 +29,7 @@ public class FileRepositoryImpl implements FileRepository {
     private static final String UPDATE_FILE_ERROR = "Cannot update file with id = %s";
 
     private final DSLContext dsl;
+    private final JooqQueryFilterTranslator translator;
 
     @Transactional(propagation = MANDATORY)
     @Override
@@ -77,26 +77,9 @@ public class FileRepositoryImpl implements FileRepository {
 
     @Transactional(propagation = MANDATORY, readOnly = true)
     @Override
-    public List<FileRecord> findAllByUserId(Long userId, @NotNull FileSearchCriteria criteria, int offset, int limit) {
-        Condition criteriaCondition = FILE.UPLOADED_BY.eq(userId);
-        if (criteria.filename() != null) {
-            criteriaCondition = criteriaCondition.and(FILE.FILENAME.like(likeAsString(criteria.filename())));
-        }
-
-        if (criteria.ext() != null) {
-            criteriaCondition = criteriaCondition.and(FILE.EXT.like(likeAsString(criteria.ext())));
-        }
-
-        if (criteria.minFileSize() != null) {
-            criteriaCondition = criteriaCondition.and(FILE.SIZE.greaterOrEqual(criteria.minFileSize()));
-        }
-
-        if (criteria.maxFileSize() != null) {
-            criteriaCondition = criteriaCondition.and(FILE.SIZE.lessOrEqual(criteria.maxFileSize()));
-        }
-
+    public List<FileRecord> findAllByUserId(Long userId, @NotNull FileFilter criteria, int offset, int limit) {
         return dsl.selectFrom(FILE)
-                .where(criteriaCondition)
+                .where(FILE.UPLOADED_BY.eq(userId).and(translator.toCondition(criteria)))
                 .orderBy(FILE.CREATED.desc())
                 .offset(offset)
                 .limit(limit)
@@ -127,11 +110,6 @@ public class FileRepositoryImpl implements FileRepository {
                         FILE.DELETED.eq(FALSE)
                 ))
                 .execute();
-    }
-
-    @NotBlank
-    private static String likeAsString(String s) {
-        return "%" + s + "%";
     }
 
 }

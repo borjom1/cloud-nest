@@ -10,7 +10,7 @@ import com.cloud.nest.fm.inout.response.SharedFileOut;
 import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.fm.mapper.FileRecordMapper;
 import com.cloud.nest.fm.model.DownloadedFile;
-import com.cloud.nest.fm.model.FileSearchCriteria;
+import com.cloud.nest.fm.model.FileFilter;
 import com.cloud.nest.fm.persistence.repository.FileRepository;
 import com.cloud.nest.fm.persistence.s3.S3FileStorage;
 import com.cloud.nest.fm.util.FileUtils;
@@ -113,7 +113,7 @@ public class FileService implements BaseFileService {
     @Override
     public List<FileOut> getFilesByUserId(
             @NotNull Long userId,
-            @NotNull FileSearchCriteria criteria,
+            @NotNull FileFilter criteria,
             int offset, int limit
     ) {
         if (Math.abs(offset - limit) > RECORDS_FETCH_LIMIT) {

@@ -8,7 +8,7 @@ import com.cloud.nest.fm.inout.response.FileOut;
 import com.cloud.nest.fm.inout.response.SharedFileOut;
 import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.fm.model.DownloadedFile;
-import com.cloud.nest.fm.model.FileSearchCriteria;
+import com.cloud.nest.fm.model.FileFilter;
 import com.cloud.nest.fm.service.FileService;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import jakarta.validation.Valid;
@@ -92,7 +92,7 @@ public class FileApiExternalController implements FileApiExternal {
     ) {
         return completedFuture(fileService.getFilesByUserId(
                 session.userId(),
-                FileSearchCriteria.builder()
+                FileFilter.builder()
                         .filename(filename)
                         .ext(extension)
                         .minFileSize(minFileSize)

@@ -1,10 +1,10 @@
-package com.cloud.nest.fm;
+package com.cloud.nest.fm.it;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class FileManagementApplicationTests {
+class FileManagementApplicationIT {
 
     @Test
     void contextLoads() {
