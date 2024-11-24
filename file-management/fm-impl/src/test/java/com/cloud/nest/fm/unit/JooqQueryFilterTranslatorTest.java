@@ -74,7 +74,7 @@ public class JooqQueryFilterTranslatorTest {
 
     @With
     @Builder
-    public record FileFilter(
+    private record FileFilter(
             @Like String fileName,
             @Like String ext,
             @GreaterOrEqual("size") Long minFileSize,
