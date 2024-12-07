@@ -7,6 +7,7 @@ package com.cloud.nest.db.fm;
 import com.cloud.nest.db.DefaultCatalog;
 import com.cloud.nest.db.fm.tables.File;
 import com.cloud.nest.db.fm.tables.Report;
+import com.cloud.nest.db.fm.tables.ReportJob;
 import com.cloud.nest.db.fm.tables.SharedFile;
 import com.cloud.nest.db.fm.tables.UserStorage;
 
@@ -42,6 +43,11 @@ public class Fm extends SchemaImpl {
     public final Report REPORT = Report.REPORT;
 
     /**
+     * The table <code>fm.report_job</code>.
+     */
+    public final ReportJob REPORT_JOB = ReportJob.REPORT_JOB;
+
+    /**
      * The table <code>fm.shared_file</code>.
      */
     public final SharedFile SHARED_FILE = SharedFile.SHARED_FILE;
@@ -69,6 +75,7 @@ public class Fm extends SchemaImpl {
         return Arrays.asList(
             File.FILE,
             Report.REPORT,
+            ReportJob.REPORT_JOB,
             SharedFile.SHARED_FILE,
             UserStorage.USER_STORAGE
         );

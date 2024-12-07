@@ -39,4 +39,17 @@
             <column name="period_end"/>
         </createIndex>
     </changeSet>
+    
+    <changeSet id="1733058531" author="borjom1">
+        <dropColumn tableName="report" columnName="period_start"/>
+        <dropColumn tableName="report" columnName="period_end"/>
+        <addColumn tableName="report">
+            <column name="report_job_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <createIndex tableName="report" indexName="report_report_job_id_idx">
+            <column name="report_job_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

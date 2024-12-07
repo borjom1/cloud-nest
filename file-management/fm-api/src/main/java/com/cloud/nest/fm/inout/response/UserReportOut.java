@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Past;
 import lombok.Builder;
 import lombok.extern.jackson.Jacksonized;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
@@ -17,12 +18,12 @@ public record UserReportOut(
         @NotNull
         @Past
         @JsonFormat(shape = STRING)
-        LocalDateTime periodStart,
+        LocalDate periodStart,
 
         @NotNull
         @Past
         @JsonFormat(shape = STRING)
-        LocalDateTime periodEnd,
+        LocalDate periodEnd,
 
         @NotNull
         Long downloadedBytes,

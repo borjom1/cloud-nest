@@ -6,6 +6,7 @@ package com.cloud.nest.db.fm;
 
 import com.cloud.nest.db.fm.tables.File;
 import com.cloud.nest.db.fm.tables.Report;
+import com.cloud.nest.db.fm.tables.ReportJob;
 import com.cloud.nest.db.fm.tables.SharedFile;
 
 import org.jooq.Index;
@@ -27,8 +28,8 @@ public class Indexes {
     public static final Index FILE_DELETED_IDX = Internal.createIndex(DSL.name("file_deleted_idx"), File.FILE, new OrderField[] { File.FILE.DELETED }, false);
     public static final Index FILE_PLACED_TO_BIN_IDX = Internal.createIndex(DSL.name("file_placed_to_bin_idx"), File.FILE, new OrderField[] { File.FILE.PLACED_TO_BIN }, false);
     public static final Index FILE_S3_OBJECT_KEY_IDX = Internal.createIndex(DSL.name("file_s3_object_key_idx"), File.FILE, new OrderField[] { File.FILE.S3_OBJECT_KEY }, true);
-    public static final Index REPORT_PERIOD_END_IDX = Internal.createIndex(DSL.name("report_period_end_idx"), Report.REPORT, new OrderField[] { Report.REPORT.PERIOD_END }, false);
-    public static final Index REPORT_PERIOD_START_IDX = Internal.createIndex(DSL.name("report_period_start_idx"), Report.REPORT, new OrderField[] { Report.REPORT.PERIOD_START }, false);
+    public static final Index REPORT_JOB_TYPE_CREATED_IDX = Internal.createIndex(DSL.name("report_job_type_created_idx"), ReportJob.REPORT_JOB, new OrderField[] { ReportJob.REPORT_JOB.TYPE, ReportJob.REPORT_JOB.CREATED }, false);
+    public static final Index REPORT_REPORT_JOB_ID_IDX = Internal.createIndex(DSL.name("report_report_job_id_idx"), Report.REPORT, new OrderField[] { Report.REPORT.REPORT_JOB_ID }, false);
     public static final Index REPORT_USER_ID_IDX = Internal.createIndex(DSL.name("report_user_id_idx"), Report.REPORT, new OrderField[] { Report.REPORT.USER_ID }, false);
     public static final Index SHARED_FILE_FILE_ID_IDX = Internal.createIndex(DSL.name("shared_file_file_id_idx"), SharedFile.SHARED_FILE, new OrderField[] { SharedFile.SHARED_FILE.FILE_ID }, false);
 }

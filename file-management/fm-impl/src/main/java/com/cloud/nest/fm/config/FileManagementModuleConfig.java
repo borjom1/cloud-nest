@@ -24,6 +24,8 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 
@@ -74,6 +76,13 @@ public class FileManagementModuleConfig {
     @Bean
     DataSourceConnectionProvider connectionProvider(DataSource dataSource) {
         return new DataSourceConnectionProvider(dataSource);
+    }
+
+    @Bean
+    TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
+        final TransactionTemplate template = new TransactionTemplate(transactionManager);
+        template.setTimeout(30);
+        return template;
     }
 
     @Bean

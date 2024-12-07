@@ -1,0 +1,31 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="1733045514" author="borjom1">
+        <createTable tableName="report_job">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="report_job_id_pkey"/>
+            </column>
+            <column name="type" type="varchar(12)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_reported_user_id" type="bigint"/>
+            <column name="created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="completed" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="report_job" indexName="report_job_type_created_idx">
+            <column name="type"/>
+            <column name="created"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

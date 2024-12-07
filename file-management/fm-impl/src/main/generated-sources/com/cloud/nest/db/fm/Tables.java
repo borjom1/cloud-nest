@@ -6,6 +6,7 @@ package com.cloud.nest.db.fm;
 
 import com.cloud.nest.db.fm.tables.File;
 import com.cloud.nest.db.fm.tables.Report;
+import com.cloud.nest.db.fm.tables.ReportJob;
 import com.cloud.nest.db.fm.tables.SharedFile;
 import com.cloud.nest.db.fm.tables.UserStorage;
 
@@ -25,6 +26,11 @@ public class Tables {
      * The table <code>fm.report</code>.
      */
     public static final Report REPORT = Report.REPORT;
+
+    /**
+     * The table <code>fm.report_job</code>.
+     */
+    public static final ReportJob REPORT_JOB = ReportJob.REPORT_JOB;
 
     /**
      * The table <code>fm.shared_file</code>.

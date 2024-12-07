@@ -6,9 +6,11 @@ package com.cloud.nest.db.fm;
 
 import com.cloud.nest.db.fm.tables.File;
 import com.cloud.nest.db.fm.tables.Report;
+import com.cloud.nest.db.fm.tables.ReportJob;
 import com.cloud.nest.db.fm.tables.SharedFile;
 import com.cloud.nest.db.fm.tables.UserStorage;
 import com.cloud.nest.db.fm.tables.records.FileRecord;
+import com.cloud.nest.db.fm.tables.records.ReportJobRecord;
 import com.cloud.nest.db.fm.tables.records.ReportRecord;
 import com.cloud.nest.db.fm.tables.records.SharedFileRecord;
 import com.cloud.nest.db.fm.tables.records.UserStorageRecord;
@@ -32,6 +34,7 @@ public class Keys {
     public static final UniqueKey<FileRecord> FILE_ID_PKEY = Internal.createUniqueKey(File.FILE, DSL.name("file_id_pkey"), new TableField[] { File.FILE.ID }, true);
     public static final UniqueKey<FileRecord> FILE_S3_OBJECT_KEY_KEY = Internal.createUniqueKey(File.FILE, DSL.name("file_s3_object_key_key"), new TableField[] { File.FILE.S3_OBJECT_KEY }, true);
     public static final UniqueKey<ReportRecord> REPORT_ID_PKEY = Internal.createUniqueKey(Report.REPORT, DSL.name("report_id_pkey"), new TableField[] { Report.REPORT.ID }, true);
+    public static final UniqueKey<ReportJobRecord> REPORT_JOB_ID_PKEY = Internal.createUniqueKey(ReportJob.REPORT_JOB, DSL.name("report_job_id_pkey"), new TableField[] { ReportJob.REPORT_JOB.ID }, true);
     public static final UniqueKey<SharedFileRecord> SHARED_FILE_ID_PKEY = Internal.createUniqueKey(SharedFile.SHARED_FILE, DSL.name("shared_file_id_pkey"), new TableField[] { SharedFile.SHARED_FILE.ID }, true);
     public static final UniqueKey<UserStorageRecord> USER_RATING_USER_ID_PKEY = Internal.createUniqueKey(UserStorage.USER_STORAGE, DSL.name("user_rating_user_id_pkey"), new TableField[] { UserStorage.USER_STORAGE.USER_ID }, true);
 }

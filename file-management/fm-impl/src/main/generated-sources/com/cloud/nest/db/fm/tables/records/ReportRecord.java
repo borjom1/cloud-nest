@@ -49,73 +49,59 @@ public class ReportRecord extends UpdatableRecordImpl<ReportRecord> {
     }
 
     /**
-     * Setter for <code>fm.report.period_start</code>.
-     */
-    public void setPeriodStart(LocalDateTime value) {
-        set(2, value);
-    }
-
-    /**
-     * Getter for <code>fm.report.period_start</code>.
-     */
-    public LocalDateTime getPeriodStart() {
-        return (LocalDateTime) get(2);
-    }
-
-    /**
-     * Setter for <code>fm.report.period_end</code>.
-     */
-    public void setPeriodEnd(LocalDateTime value) {
-        set(3, value);
-    }
-
-    /**
-     * Getter for <code>fm.report.period_end</code>.
-     */
-    public LocalDateTime getPeriodEnd() {
-        return (LocalDateTime) get(3);
-    }
-
-    /**
      * Setter for <code>fm.report.downloaded_bytes</code>.
      */
     public void setDownloadedBytes(Long value) {
-        set(4, value);
+        set(2, value);
     }
 
     /**
      * Getter for <code>fm.report.downloaded_bytes</code>.
      */
     public Long getDownloadedBytes() {
-        return (Long) get(4);
+        return (Long) get(2);
     }
 
     /**
      * Setter for <code>fm.report.uploaded_bytes</code>.
      */
     public void setUploadedBytes(Long value) {
-        set(5, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>fm.report.uploaded_bytes</code>.
      */
     public Long getUploadedBytes() {
-        return (Long) get(5);
+        return (Long) get(3);
     }
 
     /**
      * Setter for <code>fm.report.created</code>.
      */
     public void setCreated(LocalDateTime value) {
-        set(6, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>fm.report.created</code>.
      */
     public LocalDateTime getCreated() {
-        return (LocalDateTime) get(6);
+        return (LocalDateTime) get(4);
+    }
+
+    /**
+     * Setter for <code>fm.report.report_job_id</code>.
+     */
+    public void setReportJobId(Long value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>fm.report.report_job_id</code>.
+     */
+    public Long getReportJobId() {
+        return (Long) get(5);
     }
 
     // -------------------------------------------------------------------------
@@ -141,16 +127,15 @@ public class ReportRecord extends UpdatableRecordImpl<ReportRecord> {
     /**
      * Create a detached, initialised ReportRecord
      */
-    public ReportRecord(Long id, Long userId, LocalDateTime periodStart, LocalDateTime periodEnd, Long downloadedBytes, Long uploadedBytes, LocalDateTime created) {
+    public ReportRecord(Long id, Long userId, Long downloadedBytes, Long uploadedBytes, LocalDateTime created, Long reportJobId) {
         super(Report.REPORT);
 
         setId(id);
         setUserId(userId);
-        setPeriodStart(periodStart);
-        setPeriodEnd(periodEnd);
         setDownloadedBytes(downloadedBytes);
         setUploadedBytes(uploadedBytes);
         setCreated(created);
+        setReportJobId(reportJobId);
         resetChangedOnNotNull();
     }
 }

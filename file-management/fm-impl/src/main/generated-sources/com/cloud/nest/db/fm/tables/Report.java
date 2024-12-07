@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.Identity;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.PlainSQL;
@@ -57,22 +58,12 @@ public class Report extends TableImpl<ReportRecord> {
     /**
      * The column <code>fm.report.id</code>.
      */
-    public final TableField<ReportRecord, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<ReportRecord, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
 
     /**
      * The column <code>fm.report.user_id</code>.
      */
     public final TableField<ReportRecord, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
-
-    /**
-     * The column <code>fm.report.period_start</code>.
-     */
-    public final TableField<ReportRecord, LocalDateTime> PERIOD_START = createField(DSL.name("period_start"), SQLDataType.LOCALDATETIME(6).nullable(false), this, "");
-
-    /**
-     * The column <code>fm.report.period_end</code>.
-     */
-    public final TableField<ReportRecord, LocalDateTime> PERIOD_END = createField(DSL.name("period_end"), SQLDataType.LOCALDATETIME(6).nullable(false), this, "");
 
     /**
      * The column <code>fm.report.downloaded_bytes</code>.
@@ -88,6 +79,11 @@ public class Report extends TableImpl<ReportRecord> {
      * The column <code>fm.report.created</code>.
      */
     public final TableField<ReportRecord, LocalDateTime> CREATED = createField(DSL.name("created"), SQLDataType.LOCALDATETIME(6).nullable(false), this, "");
+
+    /**
+     * The column <code>fm.report.report_job_id</code>.
+     */
+    public final TableField<ReportRecord, Long> REPORT_JOB_ID = createField(DSL.name("report_job_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     private Report(Name alias, Table<ReportRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -125,7 +121,12 @@ public class Report extends TableImpl<ReportRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.REPORT_PERIOD_END_IDX, Indexes.REPORT_PERIOD_START_IDX, Indexes.REPORT_USER_ID_IDX);
+        return Arrays.asList(Indexes.REPORT_REPORT_JOB_ID_IDX, Indexes.REPORT_USER_ID_IDX);
+    }
+
+    @Override
+    public Identity<ReportRecord, Long> getIdentity() {
+        return (Identity<ReportRecord, Long>) super.getIdentity();
     }
 
     @Override

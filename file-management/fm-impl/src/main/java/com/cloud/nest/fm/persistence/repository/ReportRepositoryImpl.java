@@ -1,11 +1,14 @@
 package com.cloud.nest.fm.persistence.repository;
 
+import com.cloud.nest.db.fm.tables.records.ReportJobRecord;
 import com.cloud.nest.db.fm.tables.records.ReportRecord;
+import com.cloud.nest.fm.inout.response.UserReportOut;
+import com.cloud.nest.fm.model.ReportType;
 import com.cloud.nest.platform.model.exception.TransactionFailedException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
-import org.jooq.DatePart;
+import org.jooq.Record2;
 import org.jooq.exception.DataAccessException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,8 +16,8 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
+import static com.cloud.nest.db.fm.Tables.REPORT_JOB;
 import static com.cloud.nest.db.fm.tables.Report.REPORT;
-import static org.jooq.impl.DSL.localDateTimeDiff;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
 
 @Repository
@@ -48,25 +51,29 @@ public class ReportRepositoryImpl implements ReportRepository {
     @Transactional(propagation = MANDATORY, readOnly = true)
     @NotNull
     @Override
-    public List<ReportRecord> findAllWeeklyByUserId(Long userId) {
-        return dsl.selectFrom(REPORT)
+    public List<UserReportOut> findAllByUserIdAndType(Long userId, ReportType reportType) {
+        return dsl.select(REPORT, REPORT_JOB)
+                .from(REPORT)
+                .join(REPORT_JOB)
+                .on(REPORT.REPORT_JOB_ID.eq(REPORT_JOB.ID))
                 .where(REPORT.USER_ID.eq(userId).and(
-                        localDateTimeDiff(DatePart.DAY, REPORT.PERIOD_START, REPORT.PERIOD_END).eq(7)
+                        REPORT_JOB.TYPE.eq(reportType.name())
                 ))
                 .orderBy(REPORT.CREATED)
-                .fetchInto(ReportRecord.class);
+                .stream()
+                .map(r -> toUserReportOut(r, reportType))
+                .toList();
     }
 
-    @Transactional(propagation = MANDATORY, readOnly = true)
-    @NotNull
-    @Override
-    public List<ReportRecord> findAllMonthlyByUserId(Long userId) {
-        return dsl.selectFrom(REPORT)
-                .where(REPORT.USER_ID.eq(userId).and(
-                        localDateTimeDiff(DatePart.DAY, REPORT.PERIOD_START, REPORT.PERIOD_END).eq(30)
-                ))
-                .orderBy(REPORT.CREATED)
-                .fetchInto(ReportRecord.class);
+    private static UserReportOut toUserReportOut(Record2<ReportRecord, ReportJobRecord> r, ReportType reportType) {
+        final ReportRecord reportRecord = r.component1();
+        return UserReportOut.builder()
+                .uploadedBytes(reportRecord.getUploadedBytes())
+                .downloadedBytes(reportRecord.getDownloadedBytes())
+                .periodStart(r.component2().getCreated().toLocalDate())
+                .periodEnd(r.component2().getCreated().minus(reportType.getPeriod()).toLocalDate())
+                .created(reportRecord.getCreated())
+                .build();
     }
 
 }
