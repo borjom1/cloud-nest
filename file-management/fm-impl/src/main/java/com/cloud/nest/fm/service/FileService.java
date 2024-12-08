@@ -26,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static com.cloud.nest.fm.service.FileSharingService.SHARED_FILE_NOT_FOUND;
@@ -98,15 +95,22 @@ public class FileService implements BaseFileService {
 
     @Transactional
     @Override
-    public void deleteFile(@NotNull Long userId, @NotNull Long fileId) {
-        final FileRecord fileRecord = getUserFile(userId, fileId);
-        fileRecord.setDeleted(true);
-        fileRepository.save(fileRecord);
+    public void deleteFilesByIds(@NotNull Long userId, @NotNull Set<Long> fileIds) {
+        final List<FileRecord> records = getUserFiles(userId, fileIds);
+        records.forEach(r -> r.setDeleted(true));
+        fileRepository.save(records);
 
-        fileSharingService.deactivateAllSharesByFileId(fileId);
-        userStorageService.updateUsedStorage(userId, fileRecord.getSize());
+        fileSharingService.deactivateAllSharesByFileIds(fileIds);
 
-        CompletableFuture.runAsync(() -> fileStorage.deleteFile(fileRecord.getS3ObjectKey()));
+        final Long filesSize = records.stream()
+                .map(FileRecord::getSize)
+                .reduce(0L, Long::sum);
+
+        userStorageService.updateUsedStorage(userId, filesSize);
+
+        CompletableFuture.runAsync(() -> records.forEach(r ->
+                fileStorage.deleteFile(r.getS3ObjectKey())
+        ));
     }
 
     @Transactional(readOnly = true)
@@ -213,6 +217,20 @@ public class FileService implements BaseFileService {
                     return foundRecord;
                 })
                 .orElseThrow(() -> new DataNotFoundException(FILE_NOT_FOUND_ERROR.formatted(fileId)));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<FileRecord> getUserFiles(Long userId, Set<Long> fileIds) {
+        final List<FileRecord> fileRecords = fileRepository.findByIds(fileIds);
+        fileRecords.stream()
+                .filter(r -> r.getDeleted() || !isUserFile(userId, r))
+                .findAny()
+                .ifPresent(foundRecord -> {
+                    throw new DataNotFoundException(FILE_NOT_FOUND_ERROR.formatted(foundRecord.getId()));
+                });
+
+        return fileRecords;
     }
 
     private boolean isUserFile(Long userId, @NotNull FileRecord record) {

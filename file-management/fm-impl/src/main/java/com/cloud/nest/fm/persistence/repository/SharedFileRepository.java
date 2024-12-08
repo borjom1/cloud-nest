@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface SharedFileRepository {
@@ -20,7 +21,7 @@ public interface SharedFileRepository {
     @NotNull
     List<SharedFileRecord> findAllNotExpiredByFileId(Long fileId);
 
-    void updateExpirationForAllNotExpiredByFileId(Long fileId, @NotNull LocalDateTime expiresAt);
+    void updateExpirationForAllNotExpiredByFileIds(@NotNull Set<Long> fileIds, @NotNull LocalDateTime expiresAt);
 
     long countNotExpiredSharesByFileId(Long fileId);
 }

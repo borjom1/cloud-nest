@@ -14,6 +14,7 @@ import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,7 +31,8 @@ import static com.cloud.nest.fm.FileApiExternal.URL_EXTERNAL;
 import static com.cloud.nest.fm.FileApiExternal.URL_FILES;
 import static com.cloud.nest.platform.infrastructure.request.RequestUtils.USER_SESSION_HEADER;
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping(URL_EXTERNAL + URL_FILES)
@@ -68,14 +71,17 @@ public class FileApiExternalController implements FileApiExternal {
         return completedFuture(null);
     }
 
-    @DeleteMapping(PATH_ID)
-    @ResponseStatus(ACCEPTED)
+    @DeleteMapping
+    @ResponseStatus(NO_CONTENT)
     @Override
-    public CompletableFuture<Void> deleteFile(
+    public CompletableFuture<Void> deleteFilesByIds(
             @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
-            @PathVariable(PARAM_ID) @Min(1L) Long id
+
+            @RequestParam(PARAM_IDS)
+            @Size(min = 1, max = 50)
+            Set<@Min(1L) Long> fileIds
     ) {
-        fileService.deleteFile(session.userId(), id);
+        fileService.deleteFilesByIds(session.userId(), fileIds);
         return completedFuture(null);
     }
 

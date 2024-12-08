@@ -12,8 +12,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.cloud.nest.db.fm.Tables.FILE;
 import static java.lang.Boolean.FALSE;
@@ -65,6 +67,15 @@ public class FileRepositoryImpl implements FileRepository {
 
     }
 
+    @Transactional(propagation = MANDATORY)
+    @Override
+    public List<FileRecord> save(@NotNull List<FileRecord> records) {
+        final LocalDateTime now = now();
+        records.forEach(r -> r.setUpdated(now));
+        dsl.batchUpdate(records).execute();
+        return records;
+    }
+
     @Transactional(propagation = MANDATORY, readOnly = true)
     @Override
     public Optional<FileRecord> findById(Long id) {
@@ -73,6 +84,14 @@ public class FileRepositoryImpl implements FileRepository {
                         .where(FILE.ID.eq(id))
                         .fetchOne()
         );
+    }
+
+    @Transactional(propagation = MANDATORY, readOnly = true)
+    @Override
+    public List<FileRecord> findByIds(Set<Long> ids) {
+        return dsl.selectFrom(FILE)
+                .where(FILE.ID.in(ids))
+                .fetchInto(FileRecord.class);
     }
 
     @Transactional(propagation = MANDATORY, readOnly = true)

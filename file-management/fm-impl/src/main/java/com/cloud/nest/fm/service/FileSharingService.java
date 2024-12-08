@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.cloud.nest.fm.FileApiExternal.URL_FILES;
@@ -111,8 +112,8 @@ public class FileSharingService {
     }
 
     @Transactional
-    public void deactivateAllSharesByFileId(@NotNull Long fileId) {
-        sharedFileRepository.updateExpirationForAllNotExpiredByFileId(fileId, now().minusYears(10L));
+    public void deactivateAllSharesByFileIds(@NotNull Set<Long> fileIds) {
+        sharedFileRepository.updateExpirationForAllNotExpiredByFileIds(fileIds, now().minusYears(10L));
     }
 
     @NotNull

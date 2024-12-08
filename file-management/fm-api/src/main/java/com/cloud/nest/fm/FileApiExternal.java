@@ -12,11 +12,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -30,6 +32,7 @@ public interface FileApiExternal {
 
     String PARAM_FILE = "file";
     String PARAM_ID = "id";
+    String PARAM_IDS = "ids";
     String PARAM_FILENAME = "filename";
     String PARAM_EXT = "ext";
     String PARAM_MIN_FILE_SIZE = "minFileSize";
@@ -47,7 +50,10 @@ public interface FileApiExternal {
 
     CompletableFuture<Void> updateFileMeta(UserAuthSession session, @Min(1L) Long id, @Valid FileMetaIn in);
 
-    CompletableFuture<Void> deleteFile(UserAuthSession session, @Min(1L) Long id);
+    CompletableFuture<Void> deleteFilesByIds(
+            UserAuthSession session,
+            @Size(min = 1, max = 50) Set<@Min(1L) Long> fileIds
+    );
 
     CompletableFuture<List<FileOut>> getFiles(
             @NotNull UserAuthSession session,

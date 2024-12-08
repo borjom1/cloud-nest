@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.cloud.nest.db.fm.Tables.SHARED_FILE;
@@ -89,11 +90,16 @@ public class SharedFileRepositoryImpl implements SharedFileRepository {
 
     @Transactional(propagation = MANDATORY)
     @Override
-    public void updateExpirationForAllNotExpiredByFileId(Long fileId, @NotNull LocalDateTime expiresAt) {
+    public void updateExpirationForAllNotExpiredByFileIds(
+            @NotNull Set<Long> fileIds,
+            @NotNull LocalDateTime expiresAt
+    ) {
+        final LocalDateTime now = now();
         dsl.update(SHARED_FILE)
                 .set(SHARED_FILE.EXPIRES_AT, expiresAt)
-                .where(SHARED_FILE.FILE_ID.eq(fileId).and(
-                        SHARED_FILE.EXPIRES_AT.greaterOrEqual(now()).or(SHARED_FILE.EXPIRES_AT.isNull())
+                .set(SHARED_FILE.UPDATED, now)
+                .where(SHARED_FILE.FILE_ID.in(fileIds).and(
+                        SHARED_FILE.EXPIRES_AT.greaterOrEqual(now).or(SHARED_FILE.EXPIRES_AT.isNull())
                 ))
                 .execute();
     }
@@ -101,7 +107,7 @@ public class SharedFileRepositoryImpl implements SharedFileRepository {
     @Transactional(propagation = MANDATORY, readOnly = true)
     @Override
     public long countNotExpiredSharesByFileId(Long fileId) {
-        final var now = now();
+        final LocalDateTime now = now();
         return dsl.fetchCount(
                 SHARED_FILE,
                 SHARED_FILE.FILE_ID.eq(fileId).and(
