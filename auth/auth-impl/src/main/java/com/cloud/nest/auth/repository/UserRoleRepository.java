@@ -8,5 +8,5 @@ import java.util.List;
 public interface UserRoleRepository {
     void insert(@NotNull UserRoleRecord record);
 
-    List<UserRoleRecord> getUserRoles(Long userId);
+    List<UserRoleRecord> getRolesByUserId(Long userId);
 }

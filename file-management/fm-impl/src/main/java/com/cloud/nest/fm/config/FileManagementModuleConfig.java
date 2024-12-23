@@ -1,8 +1,7 @@
 package com.cloud.nest.fm.config;
 
-import com.cloud.nest.platform.infrastructure.auth.AuthSessionConverter;
-import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
-import com.cloud.nest.um.UserManagementApiConfig;
+import com.cloud.nest.platform.infrastructure.auth.UserAuthSessionConverter;
+import com.cloud.nest.platform.infrastructure.security.CommonSecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.minio.MinioClient;
 import org.jooq.DSLContext;
@@ -13,11 +12,9 @@ import org.jooq.impl.DataSourceConnectionProvider;
 import org.jooq.impl.DefaultConfiguration;
 import org.jooq.impl.DefaultDSLContext;
 import org.jooq.impl.DefaultExecuteListenerProvider;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
@@ -33,7 +30,7 @@ import static java.util.Objects.requireNonNull;
 
 @Configuration
 @EnableScheduling
-@Import(UserManagementApiConfig.class)
+@Import({UserAuthSessionConverter.class, CommonSecurityConfig.class})
 public class FileManagementModuleConfig {
 
     @Bean
@@ -49,28 +46,11 @@ public class FileManagementModuleConfig {
     }
 
     @Bean
-    @ConfigurationProperties("business.storage")
-    StorageProperties storageProperties() {
-        return new StorageProperties();
-    }
-
-    @Bean
-    @ConfigurationProperties("minio")
-    MinIOProperties minIOProperties() {
-        return new MinIOProperties();
-    }
-
-    @Bean
     MinioClient minioClient(MinIOProperties properties) {
         return MinioClient.builder()
                 .endpoint(properties.getUrl())
                 .credentials(properties.getUsername(), properties.getPassword())
                 .build();
-    }
-
-    @Bean
-    Converter<String, UserAuthSession> authSessionConverter(ObjectMapper objectMapper) {
-        return new AuthSessionConverter(objectMapper);
     }
 
     @Bean

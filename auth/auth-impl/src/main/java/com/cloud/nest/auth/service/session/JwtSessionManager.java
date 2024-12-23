@@ -1,8 +1,9 @@
-package com.cloud.nest.auth.service;
+package com.cloud.nest.auth.service.session;
 
 import com.cloud.nest.auth.exception.AuthError;
 import com.cloud.nest.auth.exception.AuthException;
 import com.cloud.nest.auth.inout.SessionStatus;
+import com.cloud.nest.auth.inout.response.ActiveSessionOut;
 import com.cloud.nest.auth.inout.response.SessionHistoryOut;
 import com.cloud.nest.auth.jwt.JwtProperties;
 import com.cloud.nest.auth.jwt.TokenSerializer;
@@ -10,9 +11,16 @@ import com.cloud.nest.auth.mapper.AuthMapper;
 import com.cloud.nest.auth.model.*;
 import com.cloud.nest.auth.repository.SessionHistoryRepository;
 import com.cloud.nest.auth.repository.SessionRepository;
+import com.cloud.nest.auth.service.UserService;
 import com.cloud.nest.db.auth.tables.records.SessionHistoryRecord;
 import com.cloud.nest.db.auth.tables.records.SessionRecord;
+import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
+import com.cloud.nest.platform.infrastructure.common.ObjectMapperUtils;
+import com.cloud.nest.platform.model.auth.UserRole;
+import com.cloud.nest.platform.model.exception.UnexpectedException;
 import com.cloud.nest.platform.model.request.ClientRequestDetails;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -28,12 +36,13 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Comparator.comparing;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class SessionService {
+public class JwtSessionManager implements SessionManager, SessionProvider {
 
     private final AuthMapper authMapper;
     private final UserService userService;
@@ -42,6 +51,7 @@ public class SessionService {
     private final SessionRepository sessionRepository;
     private final SessionHistoryRepository sessionHistoryRepository;
     private final TransactionTemplate transactionTemplate;
+    private final ObjectMapper objectMapper;
 
     @Scheduled(fixedRateString = "${security.jwt.session-cleanup-interval}", timeUnit = MINUTES)
     void cleanUpExpiredSessions() {
@@ -53,28 +63,26 @@ public class SessionService {
 
     @Transactional(readOnly = true)
     @Nullable
+    @Override
     public SessionRecord findById(String sessionId) {
         return sessionRepository.findById(sessionId);
     }
 
-    @Transactional(readOnly = true)
-    public boolean sessionExistsForIpAddress(String clientIpAddress) {
-        return sessionRepository.existsActiveSession(clientIpAddress);
-    }
-
     @Transactional
-    @NotNull
-    public TokenSession createSession(@NotNull SessionProperties sessionProperties) {
+    @Override
+    public TokenSession createSession(@NotNull SessionProperties properties) {
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime expiresAt = now.plus(jwtProperties.getAccessTtl());
+        final List<UserRole> roles = userService.getUserRoles(properties.userId());
+        final String serializedRoles = ObjectMapperUtils.toJson(objectMapper, roles);
 
-        final SessionRecord sessionRecord = authMapper.toSessionRecord(sessionProperties, now, expiresAt);
+        final SessionRecord sessionRecord = authMapper.toSessionRecord(properties, now, expiresAt, serializedRoles);
         sessionRepository.insert(sessionRecord);
 
         final SessionHistoryRecord sessionHistoryRecord = authMapper.toSessionHistoryRecord(sessionRecord);
         sessionHistoryRepository.save(sessionHistoryRecord);
 
-        final ImmutablePair<AccessToken, RefreshToken> tokens = createTokens(sessionRecord, sessionProperties.requestDetails());
+        final ImmutablePair<AccessToken, RefreshToken> tokens = createTokens(sessionRecord, properties.requestDetails());
         final String serializedAccessToken = tokenSerializer.serializeToken(tokens.getLeft());
         final String serializedRefreshToken = tokenSerializer.serializeToken(tokens.getRight());
 
@@ -88,7 +96,8 @@ public class SessionService {
 
     @Transactional
     @NotNull
-    public TokenSession refreshSession(@NotNull RefreshToken refreshToken, @NotNull ClientRequestDetails requestDetails) {
+    @Override
+    public TokenSession refreshSession(RefreshToken refreshToken, ClientRequestDetails requestDetails) {
         if (!refreshToken.getAuthorities().contains(TokenAuthority.REFRESH)) {
             throw new AuthException(AuthError.INVALID_CREDENTIALS);
         }
@@ -114,7 +123,35 @@ public class SessionService {
         );
     }
 
+    @Transactional
+    public void logout(UserAuthSession session) {
+        final SessionRecord record = sessionRepository.findById(session.sessionId());
+        if (record == null) {
+            throw new UnexpectedException("Unable to perform logout due to session absence");
+        }
+        record.setStatus(SessionStatus.DISABLED.name());
+        sessionRepository.update(record);
+    }
+
+    @Transactional
+    @Override
+    public void updateLastActive(SessionRecord record) {
+        record.setLastActive(LocalDateTime.now());
+        sessionRepository.update(record);
+    }
+
     @Transactional(readOnly = true)
+    @Override
+    public List<ActiveSessionOut> getActiveSessionsByUserId(Long userId) {
+        return sessionRepository.findAllActiveByUserId(userId)
+                .stream()
+                .map(authMapper::toActiveSessionOut)
+                .sorted(comparing(ActiveSessionOut::lastActive).reversed())
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public List<SessionHistoryOut> getSessionHistoryByUserId(Long userId, int offset, int limit) {
         return sessionHistoryRepository.findAllByUserIdOrderedByCreated(userId, offset, limit)
                 .stream()
@@ -122,13 +159,23 @@ public class SessionService {
                 .toList();
     }
 
-    public boolean isSessionActive(@Nullable SessionRecord sessionRecord) {
-        return sessionRecord != null && sessionRecord.getStatus().equals(SessionStatus.ACTIVE.name());
+    @Override
+    public boolean isSessionActive(@Nullable SessionRecord record) {
+        return record != null && record.getStatus().equals(SessionStatus.ACTIVE.name());
     }
 
     @Transactional
-    public void updateSessionRecord(@NotNull SessionRecord sessionRecord) {
-        sessionRepository.update(sessionRecord);
+    @Override
+    public void deactivateAllSessionsByUserId(Long userId) {
+        sessionRepository.deactivateAllSessionsByUserId(userId);
+    }
+
+    @Override
+    public List<UserRole> extractRoles(SessionRecord record) {
+        return record.getJsonProperties() == null
+                ? Collections.emptyList()
+                : ObjectMapperUtils.toParametrizedObject(objectMapper, record.getJsonProperties(), new TypeReference<>() {
+        });
     }
 
     /**

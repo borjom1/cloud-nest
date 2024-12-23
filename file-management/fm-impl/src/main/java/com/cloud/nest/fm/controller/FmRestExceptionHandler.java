@@ -26,12 +26,9 @@ public class FmRestExceptionHandler extends BaseRestExceptionHandler {
         return createDefaultError(e.getMessage(), webRequest, BAD_REQUEST);
     }
 
-    @ExceptionHandler({
-            StorageSpaceLimitExceededException.class,
-            OperationNotAllowedException.class
-    })
+    @ExceptionHandler({StorageSpaceLimitExceededException.class, OperationNotAllowedException.class})
     @ResponseStatus(FORBIDDEN)
-    public ApiError handleForbiddenActionError(
+    public ApiError handleAuthorizationError(
             @NotNull ServletWebRequest webRequest,
             @NotNull RuntimeException e
     ) {

@@ -26,7 +26,7 @@ public class UserRoleRepositoryImpl implements UserRoleRepository {
 
     @Transactional(propagation = MANDATORY, readOnly = true)
     @Override
-    public List<UserRoleRecord> getUserRoles(Long userId) {
+    public List<UserRoleRecord> getRolesByUserId(Long userId) {
         return dsl.selectFrom(USER_ROLE)
                 .where(USER_ROLE.USER_ID.eq(userId))
                 .fetchInto(UserRoleRecord.class);

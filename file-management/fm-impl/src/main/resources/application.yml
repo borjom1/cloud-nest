@@ -1,9 +1,16 @@
 server:
   port: 8070
 
+
 spring:
   application:
     name: file-management-service
+
+  security:
+    filter:
+      dispatcher-types:
+        - request
+        - error
 
   cloud:
     consul:
@@ -46,3 +53,6 @@ business:
       default-storage-size: 5000000000
     bin:
       clear-rate: 30d
+logging:
+  level:
+    org.springframework.security: TRACE

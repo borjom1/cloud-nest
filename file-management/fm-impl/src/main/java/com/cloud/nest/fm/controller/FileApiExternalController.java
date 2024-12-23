@@ -11,6 +11,7 @@ import com.cloud.nest.fm.model.DownloadedFile;
 import com.cloud.nest.fm.model.FileFilter;
 import com.cloud.nest.fm.service.FileService;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -30,12 +31,14 @@ import java.util.concurrent.CompletableFuture;
 import static com.cloud.nest.fm.FileApiExternal.URL_EXTERNAL;
 import static com.cloud.nest.fm.FileApiExternal.URL_FILES;
 import static com.cloud.nest.platform.infrastructure.request.RequestUtils.USER_SESSION_HEADER;
+import static com.cloud.nest.platform.model.auth.UserRole.UserRoleCodes.USER;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping(URL_EXTERNAL + URL_FILES)
+@RolesAllowed(USER)
 @RequiredArgsConstructor
 public class FileApiExternalController implements FileApiExternal {
 

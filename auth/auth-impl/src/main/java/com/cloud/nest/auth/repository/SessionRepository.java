@@ -4,6 +4,8 @@ import com.cloud.nest.db.auth.tables.records.SessionRecord;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
+
 public interface SessionRepository {
     void insert(@NotNull SessionRecord record);
 
@@ -15,4 +17,8 @@ public interface SessionRepository {
     boolean existsActiveSession(String clientIp);
 
     int deleteExpiredSessions();
+
+    int deactivateAllSessionsByUserId(Long userId);
+
+    List<SessionRecord> findAllActiveByUserId(Long userId);
 }

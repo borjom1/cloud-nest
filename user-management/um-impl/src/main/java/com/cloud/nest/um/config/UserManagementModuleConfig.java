@@ -1,8 +1,9 @@
 package com.cloud.nest.um.config;
 
 import com.cloud.nest.auth.AuthApiConfig;
-import com.cloud.nest.platform.infrastructure.auth.AuthSessionConverter;
-import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
+import com.cloud.nest.platform.infrastructure.auth.UserAuthSessionConverter;
+import com.cloud.nest.platform.infrastructure.security.AnonymousEndpoints;
+import com.cloud.nest.platform.infrastructure.security.CommonSecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.DSLContext;
 import org.jooq.ExecuteContext;
@@ -15,29 +16,29 @@ import org.jooq.impl.DefaultExecuteListenerProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 import javax.sql.DataSource;
 
+import static com.cloud.nest.um.impl.UserApiExternalStandalone.URL_USERS;
 import static java.util.Objects.requireNonNull;
 
 @Configuration
-@Import(AuthApiConfig.class)
+@Import({AuthApiConfig.class, UserAuthSessionConverter.class, CommonSecurityConfig.class})
 public class UserManagementModuleConfig {
+
+    @Bean
+    AnonymousEndpoints anonymousEndpoints() {
+        return AnonymousEndpoints.of(URL_USERS);
+    }
 
     @Bean
     ObjectMapper objectMapper() {
         final var objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
         return objectMapper;
-    }
-
-    @Bean
-    Converter<String, UserAuthSession> authSessionConverter(ObjectMapper objectMapper) {
-        return new AuthSessionConverter(objectMapper);
     }
 
     @Bean

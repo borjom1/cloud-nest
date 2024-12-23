@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -37,6 +38,15 @@ public class BaseRestExceptionHandler {
     public ApiError handleGlobalError(@NotNull ServletWebRequest webRequest, @NotNull Exception e) {
         log.error("Handle global error: {}", e.getMessage());
         return createDefaultError(e.getMessage(), webRequest, INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    @ResponseStatus(FORBIDDEN)
+    public ApiError handleAuthorizationError(
+            @NotNull ServletWebRequest webRequest,
+            @NotNull RuntimeException e
+    ) {
+        return createDefaultError(e.getMessage(), webRequest, FORBIDDEN);
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)

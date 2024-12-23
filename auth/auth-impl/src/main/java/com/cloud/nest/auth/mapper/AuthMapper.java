@@ -1,13 +1,13 @@
 package com.cloud.nest.auth.mapper;
 
-import com.cloud.nest.auth.inout.request.NewAuthUserIn;
 import com.cloud.nest.auth.inout.SessionStatus;
+import com.cloud.nest.auth.inout.request.NewAuthUserIn;
+import com.cloud.nest.auth.inout.response.ActiveSessionOut;
 import com.cloud.nest.auth.inout.response.SessionHistoryOut;
 import com.cloud.nest.auth.model.SessionProperties;
 import com.cloud.nest.db.auth.tables.records.SessionHistoryRecord;
 import com.cloud.nest.db.auth.tables.records.SessionRecord;
 import com.cloud.nest.db.auth.tables.records.UserRecord;
-import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,9 +17,6 @@ import java.time.LocalDateTime;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AuthMapper {
 
-    @Mapping(target = "sessionId", source = "id")
-    UserAuthSession toOut(SessionRecord record);
-
     @Mapping(target = "created", source = "dateTime")
     @Mapping(target = "updated", source = "dateTime")
     @Mapping(target = "id", source = "in.userId")
@@ -28,7 +25,7 @@ public interface AuthMapper {
     @Mapping(target = "id", expression = "java(java.util.UUID.randomUUID().toString())")
     @Mapping(target = "userId", source = "sessionProperties.userId")
     @Mapping(target = "clientIp", source = "sessionProperties.requestDetails.clientIp")
-    @Mapping(target = "userAgent", source = "sessionProperties.requestDetails.clientAgent")
+    @Mapping(target = "userAgent", source = "sessionProperties.requestDetails.userAgent")
     @Mapping(target = "username", source = "sessionProperties.username")
     @Mapping(target = "lastActive", source = "now")
     @Mapping(target = "created", source = "now")
@@ -37,8 +34,11 @@ public interface AuthMapper {
     SessionRecord toSessionRecord(
             SessionProperties sessionProperties,
             LocalDateTime now,
-            LocalDateTime expiresAt
+            LocalDateTime expiresAt,
+            String jsonProperties
     );
+
+    ActiveSessionOut toActiveSessionOut(SessionRecord record);
 
     @Mapping(target = "id", ignore = true)
     SessionHistoryRecord toSessionHistoryRecord(SessionRecord record);

@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 public interface UserRepository {
     void insert(@NotNull UserRecord record);
 
+    void update(@NotNull UserRecord record);
+
     boolean existsById(long id);
 
     @Nullable

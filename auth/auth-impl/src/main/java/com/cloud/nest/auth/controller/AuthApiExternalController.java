@@ -1,11 +1,13 @@
 package com.cloud.nest.auth.controller;
 
 import com.cloud.nest.auth.AuthApiExternal;
-import com.cloud.nest.auth.inout.response.AccessTokenOut;
+import com.cloud.nest.auth.inout.request.ChangePasswordIn;
 import com.cloud.nest.auth.inout.request.UserAuthIn;
+import com.cloud.nest.auth.inout.response.AccessTokenOut;
+import com.cloud.nest.auth.inout.response.ActiveSessionOut;
 import com.cloud.nest.auth.inout.response.SessionHistoryOut;
-import com.cloud.nest.auth.service.AuthenticationService;
-import com.cloud.nest.auth.service.AuthorizationService;
+import com.cloud.nest.auth.service.AuthService;
+import com.cloud.nest.auth.service.session.SessionProvider;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import com.cloud.nest.platform.infrastructure.request.RequestUtils;
 import com.cloud.nest.platform.infrastructure.response.ComplexResponse;
@@ -23,20 +25,21 @@ import static com.cloud.nest.platform.infrastructure.request.RequestUtils.USER_S
 import static com.cloud.nest.platform.infrastructure.request.RequestUtils.getRequestClientDetails;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping(BASE_URL)
 @RequiredArgsConstructor
 public class AuthApiExternalController implements AuthApiExternal {
 
-    private final AuthenticationService authenticationService;
-    private final AuthorizationService authorizationService;
+    private final AuthService authService;
+    private final SessionProvider sessionProvider;
 
     @PostMapping(URL_LOGIN)
     @ResponseStatus(CREATED)
     @Override
     public CompletableFuture<ComplexResponse<AccessTokenOut>> authenticateUser(@Valid @RequestBody UserAuthIn in) {
-        return completedFuture(authenticationService.authenticateUser(in, getRequestClientDetails()));
+        return completedFuture(authService.authenticateUser(in, getRequestClientDetails()));
     }
 
     @PostMapping(URL_REFRESH)
@@ -46,8 +49,34 @@ public class AuthApiExternalController implements AuthApiExternal {
             @CookieValue(AUTH_REFRESH_COOKIE) Cookie refreshCookie
     ) {
         return completedFuture(
-                authorizationService.refreshUserSession(refreshCookie, RequestUtils.getRequestClientDetails())
+                authService.refreshUserSession(refreshCookie, RequestUtils.getRequestClientDetails())
         );
+    }
+
+    @DeleteMapping(URL_USER + URL_SESSIONS)
+    @ResponseStatus(NO_CONTENT)
+    @Override
+    public CompletableFuture<Void> logout(@RequestHeader(USER_SESSION_HEADER) UserAuthSession session) {
+        authService.logout(session);
+        return completedFuture(null);
+    }
+
+    @PatchMapping(URL_USER + URL_PASSWORD)
+    @Override
+    public CompletableFuture<Void> changePassword(
+            @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
+            @Valid @RequestBody ChangePasswordIn in
+    ) {
+        authService.changePassword(session, in);
+        return completedFuture(null);
+    }
+
+    @GetMapping(URL_USER + URL_SESSIONS)
+    @Override
+    public CompletableFuture<List<ActiveSessionOut>> getActiveSessions(
+            @RequestHeader(USER_SESSION_HEADER) UserAuthSession session
+    ) {
+        return completedFuture(sessionProvider.getActiveSessionsByUserId(session.userId()));
     }
 
     @GetMapping(URL_USER + URL_HISTORY)
@@ -57,7 +86,7 @@ public class AuthApiExternalController implements AuthApiExternal {
             @RequestParam(PARAM_OFFSET) int offset,
             @RequestParam(PARAM_LIMIT) int limit
     ) {
-        return completedFuture(authenticationService.getAuthSessionHistory(session, offset, limit));
+        return completedFuture(sessionProvider.getSessionHistoryByUserId(session.userId(), offset, limit));
     }
 
 }

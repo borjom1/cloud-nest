@@ -16,9 +16,6 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 public record SessionHistoryOut(
 
         @NotNull
-        Long id,
-
-        @NotNull
         @Past
         @JsonFormat(shape = STRING)
         LocalDateTime created,

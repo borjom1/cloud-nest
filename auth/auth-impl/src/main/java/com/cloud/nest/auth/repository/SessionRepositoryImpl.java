@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.cloud.nest.db.auth.Tables.SESSION;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
@@ -46,8 +47,9 @@ public class SessionRepositoryImpl implements SessionRepository {
     public boolean existsActiveSession(String clientIp) {
         return dsl.fetchExists(
                 SESSION,
-                SESSION.CLIENT_IP.eq(clientIp)
-                        .and(SESSION.STATUS.equalIgnoreCase(SessionStatus.ACTIVE.name()))
+                SESSION.CLIENT_IP.eq(clientIp).and(
+                        SESSION.STATUS.equalIgnoreCase(SessionStatus.ACTIVE.name())
+                )
         );
     }
 
@@ -57,6 +59,27 @@ public class SessionRepositoryImpl implements SessionRepository {
         return dsl.deleteFrom(SESSION)
                 .where(SESSION.EXPIRES_AT.lessThan(LocalDateTime.now()))
                 .execute();
+    }
+
+    @Transactional(propagation = MANDATORY)
+    @Override
+    public int deactivateAllSessionsByUserId(Long userId) {
+        return dsl.update(SESSION)
+                .set(SESSION.STATUS, SessionStatus.DISABLED.name())
+                .where(SESSION.USER_ID.eq(userId))
+                .execute();
+    }
+
+    @Transactional(propagation = MANDATORY, readOnly = true)
+    @Override
+    public List<SessionRecord> findAllActiveByUserId(Long userId) {
+        return dsl.selectFrom(SESSION)
+                .where(SESSION.USER_ID.eq(userId).and(
+                        SESSION.STATUS.eq(SessionStatus.ACTIVE.name()).and(
+                                SESSION.EXPIRES_AT.greaterThan(LocalDateTime.now())
+                        )
+                ))
+                .fetchInto(SessionRecord.class);
     }
 
 }

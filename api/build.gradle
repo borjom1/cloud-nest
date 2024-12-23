@@ -12,7 +12,9 @@ repositories {
 }
 
 dependencies {
-    implementation(project(':platform'))
+    implementation(project(':platform')) {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-security'
+    }
     implementation(project(':auth:auth-api'))
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"

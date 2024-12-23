@@ -10,6 +10,8 @@ import org.jooq.exception.DataAccessException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 import static com.cloud.nest.db.auth.Tables.USER;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
 
@@ -24,6 +26,17 @@ public class UserRepositoryImpl implements UserRepository {
     public void insert(@NotNull UserRecord record) {
         try {
             dsl.executeInsert(record);
+        } catch (DataAccessException e) {
+            throw new TransactionFailedException("Cannot insert user with sessionId = %d".formatted(record.getId()), e);
+        }
+    }
+
+    @Transactional(propagation = MANDATORY)
+    @Override
+    public void update(@NotNull UserRecord record) {
+        try {
+            record.setUpdated(LocalDateTime.now());
+            dsl.executeUpdate(record);
         } catch (DataAccessException e) {
             throw new TransactionFailedException("Cannot insert user with sessionId = %d".formatted(record.getId()), e);
         }

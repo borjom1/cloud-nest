@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,6 +26,11 @@ public class UserService {
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthMapper authMapper;
+
+    @Transactional
+    public void update(UserRecord record) {
+        userRepository.update(record);
+    }
 
     @Transactional
     public void saveUser(@NotNull NewAuthUserIn in) {
@@ -40,9 +46,17 @@ public class UserService {
 
         final UserRoleRecord userRoleRecord = new UserRoleRecord();
         userRoleRecord.setUserId(in.userId());
-        userRoleRecord.setRole(UserRole.USER.name());
+        userRoleRecord.setRole(UserRole.USER.getCode());
         userRoleRecord.setCreated(now);
         userRoleRepository.insert(userRoleRecord);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserRole> getUserRoles(Long userId) {
+        return userRoleRepository.getRolesByUserId(userId)
+                .stream()
+                .map(r -> UserRole.fromCode(r.getRole()))
+                .toList();
     }
 
     @Transactional(readOnly = true)

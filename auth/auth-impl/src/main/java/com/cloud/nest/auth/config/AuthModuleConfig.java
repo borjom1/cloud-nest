@@ -1,6 +1,6 @@
 package com.cloud.nest.auth.config;
 
-import com.cloud.nest.platform.infrastructure.auth.AuthSessionConverter;
+import com.cloud.nest.platform.infrastructure.auth.UserAuthSessionConverter;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.DSLContext;
@@ -36,7 +36,7 @@ public class AuthModuleConfig {
 
     @Bean
     Converter<String, UserAuthSession> authSessionConverter(ObjectMapper objectMapper) {
-        return new AuthSessionConverter(objectMapper);
+        return new UserAuthSessionConverter(objectMapper);
     }
 
     @Bean
