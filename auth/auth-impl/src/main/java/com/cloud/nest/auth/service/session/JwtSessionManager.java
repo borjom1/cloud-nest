@@ -70,19 +70,19 @@ public class JwtSessionManager implements SessionManager, SessionProvider {
 
     @Transactional
     @Override
-    public TokenSession createSession(@NotNull SessionProperties properties) {
+    public TokenSession createSession(@NotNull SessionCreate sessionCreate) {
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime expiresAt = now.plus(jwtProperties.getAccessTtl());
-        final List<UserRole> roles = userService.getUserRoles(properties.userId());
+        final List<UserRole> roles = userService.getUserRoles(sessionCreate.userId());
         final String serializedRoles = ObjectMapperUtils.toJson(objectMapper, roles);
 
-        final SessionRecord sessionRecord = authMapper.toSessionRecord(properties, now, expiresAt, serializedRoles);
+        final SessionRecord sessionRecord = authMapper.toSessionRecord(sessionCreate, now, expiresAt, serializedRoles);
         sessionRepository.insert(sessionRecord);
 
         final SessionHistoryRecord sessionHistoryRecord = authMapper.toSessionHistoryRecord(sessionRecord);
-        sessionHistoryRepository.save(sessionHistoryRecord);
+        sessionHistoryRepository.insert(sessionHistoryRecord);
 
-        final ImmutablePair<AccessToken, RefreshToken> tokens = createTokens(sessionRecord, properties.requestDetails());
+        final ImmutablePair<AccessToken, RefreshToken> tokens = createTokens(sessionRecord, sessionCreate.requestDetails());
         final String serializedAccessToken = tokenSerializer.serializeToken(tokens.getLeft());
         final String serializedRefreshToken = tokenSerializer.serializeToken(tokens.getRight());
 
@@ -115,7 +115,7 @@ public class JwtSessionManager implements SessionManager, SessionProvider {
         }
 
         return createSession(
-                SessionProperties.builder()
+                SessionCreate.builder()
                         .userId(refreshToken.getSubjectV3())
                         .username(refreshToken.getSubjectV2())
                         .requestDetails(requestDetails)
@@ -136,8 +136,14 @@ public class JwtSessionManager implements SessionManager, SessionProvider {
     @Transactional
     @Override
     public void updateLastActive(SessionRecord record) {
-        record.setLastActive(LocalDateTime.now());
+        final var now = LocalDateTime.now();
+        record.setLastActive(now);
         sessionRepository.update(record);
+        sessionHistoryRepository.updateLastActiveBySessionIdAndUserId(
+                record.getId(),
+                record.getUserId(),
+                now
+        );
     }
 
     @Transactional(readOnly = true)

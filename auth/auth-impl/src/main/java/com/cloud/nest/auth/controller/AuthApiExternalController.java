@@ -39,7 +39,7 @@ public class AuthApiExternalController implements AuthApiExternal {
     @ResponseStatus(CREATED)
     @Override
     public CompletableFuture<ComplexResponse<AccessTokenOut>> authenticateUser(@Valid @RequestBody UserAuthIn in) {
-        return completedFuture(authService.authenticateUser(in, getRequestClientDetails()));
+        return completedFuture(authService.authenticate(in, getRequestClientDetails()));
     }
 
     @PostMapping(URL_REFRESH)

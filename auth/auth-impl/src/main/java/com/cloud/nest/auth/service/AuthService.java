@@ -8,7 +8,7 @@ import com.cloud.nest.auth.inout.response.AccessTokenOut;
 import com.cloud.nest.auth.jwt.TokenVerifier;
 import com.cloud.nest.auth.model.AccessToken;
 import com.cloud.nest.auth.model.RefreshToken;
-import com.cloud.nest.auth.model.SessionProperties;
+import com.cloud.nest.auth.model.SessionCreate;
 import com.cloud.nest.auth.model.TokenSession;
 import com.cloud.nest.auth.service.session.SessionManager;
 import com.cloud.nest.auth.utils.CookieUtils;
@@ -42,7 +42,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public ComplexResponse<AccessTokenOut> authenticateUser(
+    public ComplexResponse<AccessTokenOut> authenticate(
             @NotNull UserAuthIn in,
             @NotNull ClientRequestDetails requestDetails
     ) {
@@ -53,7 +53,7 @@ public class AuthService {
         }
 
         final TokenSession tokenSession = sessionManager.createSession(
-                SessionProperties.builder()
+                SessionCreate.builder()
                         .userId(optUserRecord.get().getId())
                         .username(in.username())
                         .requestDetails(requestDetails)

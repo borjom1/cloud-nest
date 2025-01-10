@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.Identity;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.PlainSQL;
@@ -56,11 +55,6 @@ public class SessionHistory extends TableImpl<SessionHistoryRecord> {
     }
 
     /**
-     * The column <code>auth.session_history.id</code>.
-     */
-    public final TableField<SessionHistoryRecord, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
-
-    /**
      * The column <code>auth.session_history.user_id</code>.
      */
     public final TableField<SessionHistoryRecord, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
@@ -84,6 +78,16 @@ public class SessionHistory extends TableImpl<SessionHistoryRecord> {
      * The column <code>auth.session_history.updated</code>.
      */
     public final TableField<SessionHistoryRecord, LocalDateTime> UPDATED = createField(DSL.name("updated"), SQLDataType.LOCALDATETIME(6).nullable(false), this, "");
+
+    /**
+     * The column <code>auth.session_history.session_id</code>.
+     */
+    public final TableField<SessionHistoryRecord, String> SESSION_ID = createField(DSL.name("session_id"), SQLDataType.VARCHAR(36).nullable(false), this, "");
+
+    /**
+     * The column <code>auth.session_history.last_active</code>.
+     */
+    public final TableField<SessionHistoryRecord, LocalDateTime> LAST_ACTIVE = createField(DSL.name("last_active"), SQLDataType.LOCALDATETIME(6), this, "");
 
     private SessionHistory(Name alias, Table<SessionHistoryRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -125,13 +129,8 @@ public class SessionHistory extends TableImpl<SessionHistoryRecord> {
     }
 
     @Override
-    public Identity<SessionHistoryRecord, Long> getIdentity() {
-        return (Identity<SessionHistoryRecord, Long>) super.getIdentity();
-    }
-
-    @Override
     public UniqueKey<SessionHistoryRecord> getPrimaryKey() {
-        return Keys.SESSION_HISTORY_ID_PKEY;
+        return Keys.SESSION_HISTORY_SESSION_ID_USER_ID_PKEY;
     }
 
     @Override

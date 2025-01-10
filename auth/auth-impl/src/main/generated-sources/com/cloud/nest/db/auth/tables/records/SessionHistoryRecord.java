@@ -8,7 +8,7 @@ import com.cloud.nest.db.auth.tables.SessionHistory;
 
 import java.time.LocalDateTime;
 
-import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.impl.UpdatableRecordImpl;
 
 
@@ -21,87 +21,101 @@ public class SessionHistoryRecord extends UpdatableRecordImpl<SessionHistoryReco
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>auth.session_history.id</code>.
-     */
-    public void setId(Long value) {
-        set(0, value);
-    }
-
-    /**
-     * Getter for <code>auth.session_history.id</code>.
-     */
-    public Long getId() {
-        return (Long) get(0);
-    }
-
-    /**
      * Setter for <code>auth.session_history.user_id</code>.
      */
     public void setUserId(Long value) {
-        set(1, value);
+        set(0, value);
     }
 
     /**
      * Getter for <code>auth.session_history.user_id</code>.
      */
     public Long getUserId() {
-        return (Long) get(1);
+        return (Long) get(0);
     }
 
     /**
      * Setter for <code>auth.session_history.client_ip</code>.
      */
     public void setClientIp(String value) {
-        set(2, value);
+        set(1, value);
     }
 
     /**
      * Getter for <code>auth.session_history.client_ip</code>.
      */
     public String getClientIp() {
-        return (String) get(2);
+        return (String) get(1);
     }
 
     /**
      * Setter for <code>auth.session_history.user_agent</code>.
      */
     public void setUserAgent(String value) {
-        set(3, value);
+        set(2, value);
     }
 
     /**
      * Getter for <code>auth.session_history.user_agent</code>.
      */
     public String getUserAgent() {
-        return (String) get(3);
+        return (String) get(2);
     }
 
     /**
      * Setter for <code>auth.session_history.created</code>.
      */
     public void setCreated(LocalDateTime value) {
-        set(4, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>auth.session_history.created</code>.
      */
     public LocalDateTime getCreated() {
-        return (LocalDateTime) get(4);
+        return (LocalDateTime) get(3);
     }
 
     /**
      * Setter for <code>auth.session_history.updated</code>.
      */
     public void setUpdated(LocalDateTime value) {
-        set(5, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>auth.session_history.updated</code>.
      */
     public LocalDateTime getUpdated() {
-        return (LocalDateTime) get(5);
+        return (LocalDateTime) get(4);
+    }
+
+    /**
+     * Setter for <code>auth.session_history.session_id</code>.
+     */
+    public void setSessionId(String value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>auth.session_history.session_id</code>.
+     */
+    public String getSessionId() {
+        return (String) get(5);
+    }
+
+    /**
+     * Setter for <code>auth.session_history.last_active</code>.
+     */
+    public void setLastActive(LocalDateTime value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>auth.session_history.last_active</code>.
+     */
+    public LocalDateTime getLastActive() {
+        return (LocalDateTime) get(6);
     }
 
     // -------------------------------------------------------------------------
@@ -109,8 +123,8 @@ public class SessionHistoryRecord extends UpdatableRecordImpl<SessionHistoryReco
     // -------------------------------------------------------------------------
 
     @Override
-    public Record1<Long> key() {
-        return (Record1) super.key();
+    public Record2<String, Long> key() {
+        return (Record2) super.key();
     }
 
     // -------------------------------------------------------------------------
@@ -127,15 +141,16 @@ public class SessionHistoryRecord extends UpdatableRecordImpl<SessionHistoryReco
     /**
      * Create a detached, initialised SessionHistoryRecord
      */
-    public SessionHistoryRecord(Long id, Long userId, String clientIp, String userAgent, LocalDateTime created, LocalDateTime updated) {
+    public SessionHistoryRecord(Long userId, String clientIp, String userAgent, LocalDateTime created, LocalDateTime updated, String sessionId, LocalDateTime lastActive) {
         super(SessionHistory.SESSION_HISTORY);
 
-        setId(id);
         setUserId(userId);
         setClientIp(clientIp);
         setUserAgent(userAgent);
         setCreated(created);
         setUpdated(updated);
+        setSessionId(sessionId);
+        setLastActive(lastActive);
         resetChangedOnNotNull();
     }
 }

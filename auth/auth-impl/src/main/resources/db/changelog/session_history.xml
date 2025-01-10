@@ -29,4 +29,19 @@
             <column name="user_id"/>
         </createIndex>
     </changeSet>
+
+    <changeSet id="1736081678" author="borjom1">
+        <dropColumn tableName="session_history" columnName="id"/>
+        <addColumn tableName="session_history">
+            <column name="session_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_active" type="datetime"/>
+        </addColumn>
+        <addPrimaryKey
+                tableName="session_history"
+                columnNames="session_id,user_id"
+                constraintName="session_history_session_id_user_id_pkey"
+        />
+    </changeSet>
 </databaseChangeLog>

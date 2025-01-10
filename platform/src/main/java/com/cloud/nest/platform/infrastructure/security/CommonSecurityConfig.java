@@ -49,7 +49,7 @@ public class CommonSecurityConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    AnonymousEndpoints anonymousEndpoints() {
+    AnonymousEndpoints noneAnonymousEndpoints() {
         return AnonymousEndpoints.none();
     }
 

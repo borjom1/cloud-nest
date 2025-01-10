@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 
 @Builder
-public record SessionProperties(
+public record SessionCreate(
 
         @NotNull
         @Positive

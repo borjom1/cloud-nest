@@ -8,7 +8,6 @@ import org.jooq.DSLContext;
 import org.jooq.exception.DataAccessException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,26 +20,31 @@ import static org.springframework.transaction.annotation.Propagation.MANDATORY;
 public class SessionHistoryRepositoryImpl implements SessionHistoryRepository {
 
     private static final String CREATE_RECORD_ERROR = "Cannot create session history: %s";
-    private static final String UPDATE_RECORD_ERROR = "Cannot update session history with id = %s";
+    private static final String UPDATE_RECORD_ERROR = "Cannot update session history with session_id = %s and user_id = %d";
 
     private final DSLContext dsl;
 
     @Transactional(propagation = MANDATORY)
     @Override
-    public void save(@NotNull SessionHistoryRecord record) {
-        final boolean isNew = ObjectUtils.isEmpty(record.getId());
+    public void insert(@NotNull SessionHistoryRecord record) {
         try {
-            if (isNew) {
-                dsl.executeInsert(record);
-            } else {
-                record.setCreated(LocalDateTime.now());
-                dsl.executeUpdate(record);
-            }
+            dsl.executeInsert(record);
         } catch (DataAccessException e) {
-            String errorMessage = isNew
-                    ? CREATE_RECORD_ERROR.formatted(record)
-                    : UPDATE_RECORD_ERROR.formatted(record.getId());
-            throw new TransactionFailedException(errorMessage, e);
+            throw new TransactionFailedException(CREATE_RECORD_ERROR.formatted(record), e);
+        }
+    }
+
+    @Transactional(propagation = MANDATORY)
+    @Override
+    public void update(@NotNull SessionHistoryRecord record) {
+        try {
+            record.setCreated(LocalDateTime.now());
+            dsl.executeUpdate(record);
+        } catch (DataAccessException e) {
+            throw new TransactionFailedException(
+                    UPDATE_RECORD_ERROR.formatted(record.getSessionId(), record.getUserId()),
+                    e
+            );
         }
     }
 
@@ -53,6 +57,17 @@ public class SessionHistoryRepositoryImpl implements SessionHistoryRepository {
                 .offset(offset)
                 .limit(limit)
                 .fetch();
+    }
+
+    @Transactional(propagation = MANDATORY)
+    @Override
+    public void updateLastActiveBySessionIdAndUserId(String sessionId, Long userId, LocalDateTime now) {
+        dsl.update(SESSION_HISTORY)
+                .set(SESSION_HISTORY.LAST_ACTIVE, now)
+                .where(SESSION_HISTORY.SESSION_ID.eq(sessionId).and(
+                        SESSION_HISTORY.USER_ID.eq(userId)
+                ))
+                .execute();
     }
 
 }
