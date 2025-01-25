@@ -5,7 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 @Builder
 public record DownloadedFile(
@@ -23,4 +25,13 @@ public record DownloadedFile(
         Resource resource
 
 ) {
+
+    public ResponseEntity<Resource> toResponseEntity() {
+        return ResponseEntity.ok()
+                .contentType(contentType)
+                .contentLength(size)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=%s".formatted(name))
+                .body(resource);
+    }
+
 }

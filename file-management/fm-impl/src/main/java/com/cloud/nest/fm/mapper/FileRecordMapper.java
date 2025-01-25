@@ -14,6 +14,10 @@ import java.time.LocalDateTime;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface FileRecordMapper {
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "table", ignore = true)
+    @Mapping(target = "qualifier", ignore = true)
+    @Mapping(target = "placedToBin", ignore = true)
     @Mapping(target = "uploadedBy", source = "userId")
     @Mapping(target = "filename", source = "filename2Ext.filename")
     @Mapping(target = "ext", source = "filename2Ext.ext")

@@ -1,12 +1,10 @@
 package com.cloud.nest.fm;
 
 import com.cloud.nest.fm.inout.request.FileMetaIn;
-import com.cloud.nest.fm.inout.request.SharedFileDownloadIn;
-import com.cloud.nest.fm.inout.request.SharedFileIn;
 import com.cloud.nest.fm.inout.response.FileOut;
-import com.cloud.nest.fm.inout.response.SharedFileOut;
 import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
+import com.cloud.nest.platform.infrastructure.streaming.ContentRangeSelection;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -16,19 +14,19 @@ import jakarta.validation.constraints.Size;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface FileApiExternal {
 
-    String URL_EXTERNAL = "/external";
+    String EXTERNAL_BASE = "/external";
     String URL_FILES = "/v1/files";
     String URL_UPLOAD = "/upload";
     String URL_DOWNLOAD = "/download";
-    String URL_SHARES = "/shares";
+    String URL_RANGE = "/range";
 
     String PARAM_FILE = "file";
     String PARAM_ID = "id";
@@ -41,10 +39,6 @@ public interface FileApiExternal {
     String PARAM_LIMIT = "limit";
 
     String PATH_ID = "/{" + PARAM_ID + "}";
-
-    String FILENAME_ATTACHMENT = "attachment; filename=%s";
-
-    long TEN_GB_IN_BYTES = 10_000_000_000L;
 
     CompletableFuture<UploadedFileOut> uploadFile(UserAuthSession session, MultipartFile... files);
 
@@ -59,24 +53,18 @@ public interface FileApiExternal {
             @NotNull UserAuthSession session,
             @Nullable String filename,
             @Nullable String extension,
-            @Nullable @Min(0L) @Max(TEN_GB_IN_BYTES) Long minFileSize,
-            @Nullable @Min(0L) @Max(TEN_GB_IN_BYTES) Long maxFileSize,
+            @Nullable @Min(0L) Long minFileSize,
+            @Nullable @Min(0L) Long maxFileSize,
             @Min(0) int offset,
             @Min(0) @Max(500) int limit
     );
 
-    CompletableFuture<SharedFileOut> shareFile(UserAuthSession session, @Min(1L) Long id, @Valid SharedFileIn in);
+    CompletableFuture<ResponseEntity<Resource>> downloadFileById(UserAuthSession session, @Min(1L) Long id);
 
-    CompletableFuture<List<SharedFileOut>> getAllSharedFilesByFileId(UserAuthSession session, @Min(1L) Long id);
-
-    CompletableFuture<SharedFileOut> deleteSharedFile(UserAuthSession session, UUID shareId);
-
-    CompletableFuture<ResponseEntity<Resource>> downloadFileByShareId(
+    ResponseEntity<StreamingResponseBody> downloadFilePartByFileId(
             UserAuthSession session,
-            UUID shareId,
-            @Valid SharedFileDownloadIn in
+            @Min(1L) Long id,
+            ContentRangeSelection rangeSelection
     );
-
-    CompletableFuture<ResponseEntity<Resource>> downloadOwnFileById(UserAuthSession session, @Min(1L) Long id);
 
 }

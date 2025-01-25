@@ -1,6 +1,7 @@
 package com.cloud.nest.fm.persistence.s3;
 
 import com.cloud.nest.fm.config.MinIOProperties;
+import com.cloud.nest.platform.infrastructure.streaming.ContentRangeSelection;
 import com.cloud.nest.platform.model.exception.UnexpectedException;
 import io.minio.*;
 import jakarta.validation.constraints.NotBlank;
@@ -77,6 +78,26 @@ public class MinIOS3FileStorage implements S3FileStorage {
         } catch (Exception e) {
             throw new UnexpectedException(
                     "Cannot download file with object key [%s]".formatted(s3ObjectKey),
+                    e
+            );
+        }
+    }
+
+    @NotNull
+    @Override
+    public InputStream downloadFileChunk(@NotBlank String s3ObjectKey, @NotNull ContentRangeSelection rangeSelection) {
+        try {
+            return minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .offset(rangeSelection.getStartByte())
+                            .length(rangeSelection.getContentLength())
+                            .bucket(bucketName)
+                            .object(s3ObjectKey)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new UnexpectedException(
+                    "Cannot download file chunk [%s] with object key [%s]".formatted(rangeSelection, s3ObjectKey),
                     e
             );
         }

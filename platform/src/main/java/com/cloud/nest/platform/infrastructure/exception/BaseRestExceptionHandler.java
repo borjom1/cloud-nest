@@ -11,6 +11,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -81,9 +82,38 @@ public class BaseRestExceptionHandler {
         return createDefaultError(e.getMessage(), webRequest, BAD_REQUEST);
     }
 
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    @ResponseStatus(BAD_REQUEST)
+    @NotNull
+    public ApiError handleMissingRequestHeaderError(
+            @NotNull ServletWebRequest webRequest,
+            @NotNull MissingRequestHeaderException e
+    ) {
+        log.error(e.getMessage());
+        return createDefaultError(
+                "Request header '%s' is not present".formatted(e.getHeaderName()),
+                webRequest,
+                BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(BAD_REQUEST)
+    @NotNull
+    public ApiError handleMethodArgumentTypeMismatchError(
+            @NotNull ServletWebRequest webRequest,
+            @NotNull MethodArgumentTypeMismatchException e
+    ) {
+        log.error(e.getMessage());
+        return createDefaultError(
+                "Invalid value '%s' for parameter '%s'".formatted(e.getValue(), e.getName()),
+                webRequest,
+                BAD_REQUEST
+        );
+    }
+
     @ExceptionHandler({
             MissingServletRequestParameterException.class,
-            MethodArgumentTypeMismatchException.class,
             MultipartException.class,
             HttpRequestMethodNotSupportedException.class
     })

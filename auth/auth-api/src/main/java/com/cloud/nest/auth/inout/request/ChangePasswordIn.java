@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
 
-import static com.cloud.nest.platform.model.validation.CommonPattern.AT_LEAST_ONE_SPECIAL_CHAR;
+import static com.cloud.nest.platform.model.validation.CommonRegexPattern.AT_LEAST_ONE_SPECIAL_CHAR;
 
 public record ChangePasswordIn(
 

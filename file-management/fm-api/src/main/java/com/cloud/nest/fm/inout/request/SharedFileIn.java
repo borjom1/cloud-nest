@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.time.ZonedDateTime;
 
-import static com.cloud.nest.platform.model.validation.CommonPattern.AT_LEAST_ONE_SPECIAL_CHAR;
+import static com.cloud.nest.platform.model.validation.CommonRegexPattern.AT_LEAST_ONE_SPECIAL_CHAR;
 
 @Builder
 @Jacksonized

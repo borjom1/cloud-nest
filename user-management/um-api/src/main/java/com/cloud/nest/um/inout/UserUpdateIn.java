@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.extern.jackson.Jacksonized;
 import org.hibernate.validator.constraints.Length;
 
-import static com.cloud.nest.platform.model.validation.CommonPattern.ONLY_LETTERS;
+import static com.cloud.nest.platform.model.validation.CommonRegexPattern.ONLY_LETTERS;
 
 @Jacksonized
 @Builder

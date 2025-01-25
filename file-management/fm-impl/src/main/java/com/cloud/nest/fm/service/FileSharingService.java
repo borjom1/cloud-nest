@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.cloud.nest.fm.FileApiExternal.URL_FILES;
-import static com.cloud.nest.fm.FileApiExternal.URL_SHARES;
 import static java.time.LocalDateTime.now;
 import static java.util.Comparator.comparing;
 
@@ -140,10 +138,10 @@ public class FileSharingService {
     @NotNull
     private SharedFileOut getSharedFileOut(@NotNull SharedFileRecord sharedFileRecord) {
         return SharedFileOut.builder()
+                .shareId(sharedFileRecord.getId())
                 .password(sharedFileRecord.getPassword() != null)
                 .created(sharedFileRecord.getCreated())
                 .expiresAt(sharedFileRecord.getExpiresAt())
-                .link(URL_FILES + URL_SHARES + "/" + sharedFileRecord.getId())
                 .downloads(sharedFileRecord.getDownloads())
                 .build();
     }

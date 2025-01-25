@@ -15,19 +15,26 @@ import com.cloud.nest.fm.persistence.repository.FileRepository;
 import com.cloud.nest.fm.persistence.s3.S3FileStorage;
 import com.cloud.nest.fm.util.FileUtils;
 import com.cloud.nest.fm.util.FileUtils.Filename2Ext;
+import com.cloud.nest.platform.infrastructure.streaming.ContentRangeSelection;
+import com.cloud.nest.platform.infrastructure.streaming.ContentStreamingResponse;
+import com.cloud.nest.platform.infrastructure.streaming.FileChunk;
 import com.cloud.nest.platform.model.exception.DataNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
 import static com.cloud.nest.fm.service.FileSharingService.SHARED_FILE_NOT_FOUND;
 import static com.cloud.nest.fm.util.FileUtils.getFilenameAndExt;
@@ -35,6 +42,7 @@ import static com.cloud.nest.fm.util.MediaTypeMapper.getMediaTypeForFileExtensio
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class FileService implements BaseFileService {
@@ -44,6 +52,7 @@ public class FileService implements BaseFileService {
 
     private final UserStorageService userStorageService;
     private final FileSharingService fileSharingService;
+    private final TransactionTemplate transactionTemplate;
     private final FileRepository fileRepository;
     private final S3FileStorage fileStorage;
     private final FileRecordMapper fileRecordMapper;
@@ -184,10 +193,44 @@ public class FileService implements BaseFileService {
     }
 
     @Transactional
-    public DownloadedFile downloadUserFile(@NotNull Long userId, @NotNull Long fileId) {
+    public FileChunk downloadFilePartByShareId(
+            @NotNull Long userId,
+            @NotNull UUID shareId,
+            @NotNull ContentRangeSelection range,
+            @NotNull SharedFileDownloadIn in
+    ) {
+        final Long fileId = fileSharingService.getSharedFile(shareId, in);
+        final FileRecord fileRecord = fileRepository.findById(fileId)
+                .orElseThrow(() -> new DataNotFoundException(SHARED_FILE_NOT_FOUND.formatted(shareId)));
+
+        if (fileRecord.getDeleted()) {
+            throw new DataNotFoundException(SHARED_FILE_NOT_FOUND.formatted(shareId));
+        }
+
+        checkRangeBounds(range, fileRecord);
+
+        final StreamingResponseBody streamingBody = ContentStreamingResponse.builder()
+                .inputStreamProvider(() -> fileStorage.downloadFileChunk(fileRecord.getS3ObjectKey(), range))
+                .onReadFinished(readBytes -> handleFileChunkRead(readBytes, userId))
+                .onError(handleFileStreamingError(userId, fileId, range))
+                .build();
+
+        fileSharingService.incrementShareDownload(shareId);
+
+        return FileChunk.builder()
+                .chunkSize(range.getContentLength())
+                .fileSize(fileRecord.getSize())
+                .contentType(MediaType.parseMediaType(fileRecord.getContentType()))
+                .rangeSelection(range)
+                .streamingBody(streamingBody)
+                .build();
+    }
+
+    @Transactional
+    public DownloadedFile downloadUserFile(@NotNull Long ownerUserId, @NotNull Long fileId) {
         final Optional<FileRecord> optFileRecord = fileRepository.findById(fileId);
         if (optFileRecord.isEmpty() ||
-            !isUserFile(userId, optFileRecord.get()) ||
+            !isUserFile(ownerUserId, optFileRecord.get()) ||
             optFileRecord.get().getDeleted()
         ) {
             throw new DataNotFoundException(FILE_NOT_FOUND_ERROR.formatted(fileId));
@@ -195,7 +238,7 @@ public class FileService implements BaseFileService {
         final FileRecord fileRecord = optFileRecord.get();
         final InputStream is = fileStorage.downloadFile(fileRecord.getS3ObjectKey());
 
-        userStorageService.updateTotalDownloadedBytes(userId, fileRecord.getSize());
+        userStorageService.updateTotalDownloadedBytes(ownerUserId, fileRecord.getSize());
 
         return DownloadedFile.builder()
                 .name(FileUtils.concatFilenameAndExt(fileRecord.getFilename(), fileRecord.getExt()))
@@ -233,8 +276,50 @@ public class FileService implements BaseFileService {
         return fileRecords;
     }
 
+    @Transactional(readOnly = true)
+    public FileChunk downloadFilePart(Long ownerUserId, Long fileId, ContentRangeSelection range) {
+        final FileRecord fileRecord = getUserFile(ownerUserId, fileId);
+        checkRangeBounds(range, fileRecord);
+
+        final StreamingResponseBody streamingBody = ContentStreamingResponse.builder()
+                .inputStreamProvider(() -> fileStorage.downloadFileChunk(fileRecord.getS3ObjectKey(), range))
+                .onReadFinished(readBytes -> handleFileChunkRead(readBytes, ownerUserId))
+                .onError(handleFileStreamingError(ownerUserId, fileId, range))
+                .build();
+
+        return FileChunk.builder()
+                .chunkSize(range.getContentLength())
+                .fileSize(fileRecord.getSize())
+                .contentType(MediaType.parseMediaType(fileRecord.getContentType()))
+                .rangeSelection(range)
+                .streamingBody(streamingBody)
+                .build();
+    }
+
     private boolean isUserFile(Long userId, @NotNull FileRecord record) {
         return record.getUploadedBy().equals(userId);
+    }
+
+    private void handleFileChunkRead(long readBytes, long userId) {
+        if (readBytes != 0) {
+            transactionTemplate.executeWithoutResult(ts -> userStorageService.updateTotalDownloadedBytes(
+                    userId,
+                    readBytes
+            ));
+        }
+    }
+
+    private BiConsumer<Long, Exception> handleFileStreamingError(Long userId, Long fileId, ContentRangeSelection range) {
+        return (readBytes, err) -> log.debug(
+                "Error occurred while reading file [{}] chunk [{}] by user [{}]. Read bytes: {}",
+                fileId, range, userId, readBytes
+        );
+    }
+
+    private void checkRangeBounds(ContentRangeSelection range, FileRecord fileRecord) {
+        if (range.getEndByte() == null || range.getEndByte() > fileRecord.getSize()) {
+            range.setEndByte(fileRecord.getSize());
+        }
     }
 
 }

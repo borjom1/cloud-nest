@@ -7,8 +7,8 @@ import lombok.Builder;
 import lombok.extern.jackson.Jacksonized;
 import org.hibernate.validator.constraints.Length;
 
-import static com.cloud.nest.platform.model.validation.CommonPattern.FILENAME_REGEX;
-import static com.cloud.nest.platform.model.validation.CommonPattern.FILE_EXTENSION_REGEX;
+import static com.cloud.nest.platform.model.validation.CommonRegexPattern.FILENAME_REGEX;
+import static com.cloud.nest.platform.model.validation.CommonRegexPattern.FILE_EXTENSION_REGEX;
 
 @Builder
 @Jacksonized

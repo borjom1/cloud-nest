@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static com.cloud.nest.fm.FileBinApiExternal.BASE_URL;
+import static com.cloud.nest.fm.FileBinApiExternal.EXTERNAL_BASE;
 import static com.cloud.nest.platform.infrastructure.request.RequestUtils.USER_SESSION_HEADER;
 import static com.cloud.nest.platform.model.auth.UserRole.UserRoleCodes.USER;
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -19,7 +19,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
-@RequestMapping(BASE_URL)
+@RequestMapping(EXTERNAL_BASE)
 @RolesAllowed(USER)
 @RequiredArgsConstructor
 public class FileBinApiExternalController implements FileBinApiExternal {

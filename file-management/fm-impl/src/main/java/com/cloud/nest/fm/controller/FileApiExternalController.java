@@ -2,42 +2,39 @@ package com.cloud.nest.fm.controller;
 
 import com.cloud.nest.fm.FileApiExternal;
 import com.cloud.nest.fm.inout.request.FileMetaIn;
-import com.cloud.nest.fm.inout.request.SharedFileDownloadIn;
-import com.cloud.nest.fm.inout.request.SharedFileIn;
 import com.cloud.nest.fm.inout.response.FileOut;
-import com.cloud.nest.fm.inout.response.SharedFileOut;
 import com.cloud.nest.fm.inout.response.UploadedFileOut;
-import com.cloud.nest.fm.model.DownloadedFile;
 import com.cloud.nest.fm.model.FileFilter;
 import com.cloud.nest.fm.service.FileService;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
+import com.cloud.nest.platform.infrastructure.streaming.ContentRangeSelection;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static com.cloud.nest.fm.FileApiExternal.URL_EXTERNAL;
+import static com.cloud.nest.fm.FileApiExternal.EXTERNAL_BASE;
 import static com.cloud.nest.fm.FileApiExternal.URL_FILES;
 import static com.cloud.nest.platform.infrastructure.request.RequestUtils.USER_SESSION_HEADER;
+import static com.cloud.nest.platform.infrastructure.streaming.ContentRangeSelection.DEFAULT_VALUE;
 import static com.cloud.nest.platform.model.auth.UserRole.UserRoleCodes.USER;
 import static java.util.concurrent.CompletableFuture.completedFuture;
+import static org.springframework.http.HttpHeaders.RANGE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
-@RequestMapping(URL_EXTERNAL + URL_FILES)
+@RequestMapping(EXTERNAL_BASE + URL_FILES)
 @RolesAllowed(USER)
 @RequiredArgsConstructor
 public class FileApiExternalController implements FileApiExternal {
@@ -111,71 +108,25 @@ public class FileApiExternalController implements FileApiExternal {
         ));
     }
 
-    @PostMapping(PATH_ID + URL_SHARES)
-    @ResponseStatus(CREATED)
-    @Override
-    public CompletableFuture<SharedFileOut> shareFile(
-            @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
-            @PathVariable(PARAM_ID) @Min(1L) Long id,
-            @Valid @RequestBody SharedFileIn in
-    ) {
-        return completedFuture(fileService.shareFile(session.userId(), id, in));
-    }
-
-    @GetMapping(PATH_ID + URL_SHARES)
-    @Override
-    public CompletableFuture<List<SharedFileOut>> getAllSharedFilesByFileId(
-            @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
-            @PathVariable(PARAM_ID) @Min(1L) Long id
-    ) {
-        return completedFuture(fileService.getAllSharedFilesByFileId(session.userId(), id));
-    }
-
-    @DeleteMapping(URL_SHARES + PATH_ID)
-    @ResponseStatus(NO_CONTENT)
-    @Override
-    public CompletableFuture<SharedFileOut> deleteSharedFile(
-            @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
-            @PathVariable(PARAM_ID) UUID shareId
-    ) {
-        fileService.deleteSharedFile(session.userId(), shareId);
-        return completedFuture(null);
-    }
-
-    @GetMapping(URL_SHARES + PATH_ID + URL_DOWNLOAD)
-    @Override
-    public CompletableFuture<ResponseEntity<Resource>> downloadFileByShareId(
-            @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
-            @PathVariable(PARAM_ID) UUID shareId,
-            @RequestBody SharedFileDownloadIn in
-    ) {
-        return completedFuture(
-                downloadedFileToResponseEntity(
-                        fileService.downloadFileByShareId(session.userId(), shareId, in)
-                )
-        );
-    }
-
     @GetMapping(PATH_ID + URL_DOWNLOAD)
     @Override
-    public CompletableFuture<ResponseEntity<Resource>> downloadOwnFileById(
+    public CompletableFuture<ResponseEntity<Resource>> downloadFileById(
             @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
             @PathVariable(PARAM_ID) @Min(1L) Long id
     ) {
         return completedFuture(
-                downloadedFileToResponseEntity(
-                        fileService.downloadUserFile(session.userId(), id)
-                )
+                fileService.downloadUserFile(session.userId(), id).toResponseEntity()
         );
     }
 
-    @NotNull
-    private ResponseEntity<Resource> downloadedFileToResponseEntity(@NotNull DownloadedFile file) {
-        return ResponseEntity.ok()
-                .contentType(file.contentType())
-                .contentLength(file.size())
-                .header(HttpHeaders.CONTENT_DISPOSITION, FILENAME_ATTACHMENT.formatted(file.name()))
-                .body(file.resource());
+    @GetMapping(PATH_ID + URL_DOWNLOAD + URL_RANGE)
+    @Override
+    public ResponseEntity<StreamingResponseBody> downloadFilePartByFileId(
+            @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
+            @PathVariable(PARAM_ID) @Min(1L) Long id,
+            @RequestHeader(value = RANGE, required = false, defaultValue = DEFAULT_VALUE) ContentRangeSelection rangeSelection
+    ) {
+        return fileService.downloadFilePart(session.userId(), id, rangeSelection).toResponseEntity();
     }
 
 }

@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ReportJobMapper {
 
+    @Mapping(target = "table", ignore = true)
+    @Mapping(target = "qualifier", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "lastReportedUserId", ignore = true)
     @Mapping(target = "created", source = "created")

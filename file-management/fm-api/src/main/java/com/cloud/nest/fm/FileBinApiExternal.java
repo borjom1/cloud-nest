@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface FileBinApiExternal {
 
-    String BASE_URL = "/external/v1/bin-files";
+    String EXTERNAL_BASE = "/external/v1/bin-files";
 
     String PARAM_ID = "id";
     String PARAM_OFFSET = "offset";

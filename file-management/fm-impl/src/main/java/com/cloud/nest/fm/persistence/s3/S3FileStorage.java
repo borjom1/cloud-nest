@@ -1,5 +1,6 @@
 package com.cloud.nest.fm.persistence.s3;
 
+import com.cloud.nest.platform.infrastructure.streaming.ContentRangeSelection;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,9 @@ public interface S3FileStorage {
 
     @NotNull
     InputStream downloadFile(@NotBlank String s3ObjectKey);
+
+    @NotNull
+    InputStream downloadFileChunk(@NotBlank String s3ObjectKey, @NotNull ContentRangeSelection rangeSelection);
 
     void deleteFile(@NotBlank String s3ObjectKey);
 }
