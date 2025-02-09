@@ -1,5 +1,6 @@
 package com.cloud.nest.fm.persistence.s3;
 
+import com.cloud.nest.fm.model.SingleFileUpload;
 import com.cloud.nest.platform.infrastructure.streaming.ContentRangeSelection;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +22,13 @@ public interface S3FileStorage {
     String uploadFile(
             @NotNull Long userId,
             @NotNull MultipartFile file,
+            @NotNull Map<String, String> metadata
+    );
+
+    @NotBlank
+    String uploadFile(
+            @NotNull Long userId,
+            @NotNull SingleFileUpload fileUpload,
             @NotNull Map<String, String> metadata
     );
 

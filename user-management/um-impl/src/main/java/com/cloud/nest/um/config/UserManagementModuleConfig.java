@@ -17,8 +17,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
@@ -26,6 +28,7 @@ import static com.cloud.nest.um.impl.UserApiExternalStandalone.URL_USERS;
 import static java.util.Objects.requireNonNull;
 
 @Configuration
+@EnableTransactionManagement
 @Import({AuthApiConfig.class, UserAuthSessionConverter.class, CommonSecurityConfig.class})
 public class UserManagementModuleConfig {
 
@@ -43,7 +46,7 @@ public class UserManagementModuleConfig {
 
     @Bean
     DataSourceConnectionProvider connectionProvider(DataSource dataSource) {
-        return new DataSourceConnectionProvider(dataSource);
+        return new DataSourceConnectionProvider(new TransactionAwareDataSourceProxy(dataSource));
     }
 
     @Bean

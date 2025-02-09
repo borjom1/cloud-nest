@@ -1,7 +1,7 @@
 package com.cloud.nest.auth.config;
 
-import com.cloud.nest.platform.infrastructure.auth.UserAuthSessionConverter;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
+import com.cloud.nest.platform.infrastructure.auth.UserAuthSessionConverter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.DSLContext;
 import org.jooq.ExecuteContext;
@@ -15,9 +15,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
@@ -25,6 +28,8 @@ import javax.sql.DataSource;
 import static java.util.Objects.requireNonNull;
 
 @Configuration
+@EnableTransactionManagement
+@EnableScheduling
 public class AuthModuleConfig {
 
     @Bean
@@ -48,7 +53,7 @@ public class AuthModuleConfig {
 
     @Bean
     DataSourceConnectionProvider connectionProvider(DataSource dataSource) {
-        return new DataSourceConnectionProvider(dataSource);
+        return new DataSourceConnectionProvider(new TransactionAwareDataSourceProxy(dataSource));
     }
 
     @Bean

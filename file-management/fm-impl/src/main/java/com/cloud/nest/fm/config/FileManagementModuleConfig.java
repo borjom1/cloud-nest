@@ -7,6 +7,7 @@ import com.cloud.nest.platform.infrastructure.streaming.ContentRangeSelectionCon
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.minio.MinioClient;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload;
 import org.jooq.DSLContext;
 import org.jooq.ExecuteContext;
 import org.jooq.ExecuteListener;
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -28,6 +30,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -39,6 +42,7 @@ import static java.util.Objects.requireNonNull;
 @Configuration
 @EnableAsync
 @EnableScheduling
+@EnableTransactionManagement
 @Import({UserAuthSessionConverter.class, CommonSecurityConfig.class, ContentRangeSelectionConverter.class})
 public class FileManagementModuleConfig implements WebMvcConfigurer {
 
@@ -75,7 +79,7 @@ public class FileManagementModuleConfig implements WebMvcConfigurer {
     @Bean
     AsyncTaskExecutor taskExecutor() {
         final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setThreadNamePrefix("umAsyncExec-");
+        executor.setThreadNamePrefix("fmAsyncExec-");
         executor.setCorePoolSize(5);
         executor.setMaxPoolSize(20);
         executor.setQueueCapacity(50);
@@ -84,7 +88,7 @@ public class FileManagementModuleConfig implements WebMvcConfigurer {
 
     @Bean
     DataSourceConnectionProvider connectionProvider(DataSource dataSource) {
-        return new DataSourceConnectionProvider(dataSource);
+        return new DataSourceConnectionProvider(new TransactionAwareDataSourceProxy(dataSource));
     }
 
     @Bean
@@ -107,6 +111,11 @@ public class FileManagementModuleConfig implements WebMvcConfigurer {
     @Bean
     DSLContext dslContext(DefaultConfiguration configuration) {
         return new DefaultDSLContext(configuration);
+    }
+
+    @Bean
+    JakartaServletFileUpload<?, ?> servletFileUpload() {
+        return new JakartaServletFileUpload<>();
     }
 
     static class JooqExceptionTranslator implements ExecuteListener {

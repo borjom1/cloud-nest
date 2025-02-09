@@ -1,14 +1,17 @@
 package com.cloud.nest.fm.controller;
 
 import com.cloud.nest.fm.FileApiExternal;
+import com.cloud.nest.fm.controller.multipart.MultipartFileHandler;
 import com.cloud.nest.fm.inout.request.FileMetaIn;
 import com.cloud.nest.fm.inout.response.FileOut;
 import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.fm.model.FileFilter;
+import com.cloud.nest.fm.model.SingleFileUpload;
 import com.cloud.nest.fm.service.FileService;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import com.cloud.nest.platform.infrastructure.streaming.ContentRangeSelection;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -16,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.util.List;
@@ -39,6 +41,7 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 @RequiredArgsConstructor
 public class FileApiExternalController implements FileApiExternal {
 
+    private final MultipartFileHandler multipartFileHandler;
     private final FileService fileService;
 
     @PostMapping(URL_UPLOAD)
@@ -46,18 +49,10 @@ public class FileApiExternalController implements FileApiExternal {
     @Override
     public CompletableFuture<UploadedFileOut> uploadFile(
             @RequestHeader(USER_SESSION_HEADER) UserAuthSession session,
-            @RequestPart(PARAM_FILE) MultipartFile... files
+            HttpServletRequest request
     ) {
-        if (files.length == 0) {
-            throw new IllegalArgumentException("No file to upload");
-        }
-        if (files.length != 1) {
-            throw new IllegalArgumentException("Only 1 file per request is allowed");
-        }
-        if (files[0].isEmpty()) {
-            throw new IllegalArgumentException("Uploaded file is empty");
-        }
-        return completedFuture(fileService.uploadFile(session.userId(), files[0]));
+        final SingleFileUpload singleFileUpload = multipartFileHandler.getSingleFileUpload(request);
+        return completedFuture(fileService.uploadFile(session.userId(), singleFileUpload));
     }
 
     @PatchMapping(PATH_ID)

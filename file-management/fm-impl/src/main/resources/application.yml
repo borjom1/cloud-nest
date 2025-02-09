@@ -36,8 +36,7 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 1GB
-      max-request-size: 1GB
+      enabled: false
 
 minio:
   url: ${MINIO_URL:http://localhost:9000}

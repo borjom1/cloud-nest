@@ -11,6 +11,7 @@ import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.fm.mapper.FileRecordMapper;
 import com.cloud.nest.fm.model.DownloadedFile;
 import com.cloud.nest.fm.model.FileFilter;
+import com.cloud.nest.fm.model.SingleFileUpload;
 import com.cloud.nest.fm.persistence.repository.FileRepository;
 import com.cloud.nest.fm.persistence.s3.S3FileStorage;
 import com.cloud.nest.fm.util.FileUtils;
@@ -22,12 +23,12 @@ import com.cloud.nest.platform.model.exception.DataNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.fileupload2.core.FileItemInput;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.InputStream;
@@ -58,18 +59,15 @@ public class FileService implements BaseFileService {
     private final FileRecordMapper fileRecordMapper;
 
     @Transactional
-    public UploadedFileOut uploadFile(@NotNull Long userId, @NotNull MultipartFile file) {
+    public UploadedFileOut uploadFile(Long userId, SingleFileUpload fileUpload) {
         userStorageService.createUserStorageIfNeeded(userId);
-        userStorageService.checkUserStorageForUpload(userId, file.getSize());
+        userStorageService.checkUserStorageForUpload(userId, fileUpload.getSize());
 
-        final String filename = file.getOriginalFilename() != null
-                ? file.getOriginalFilename()
-                : file.getName();
-
-        final Filename2Ext filename2Ext = FileUtils.truncate(getFilenameAndExt(filename));
+        final FileItemInput itemInput = fileUpload.getFileInput();
+        final Filename2Ext filename2Ext = FileUtils.truncate(getFilenameAndExt(itemInput.getName()));
         final String s3ObjectKey = fileStorage.uploadFile(
                 userId,
-                file,
+                fileUpload,
                 Map.of(
                         S3FileStorage.FILENAME_META, filename2Ext.filename(),
                         S3FileStorage.FILE_EXT_META, defaultIfEmpty(filename2Ext.ext(), EMPTY),
@@ -82,9 +80,9 @@ public class FileService implements BaseFileService {
                 s3ObjectKey,
                 userId,
                 filename2Ext,
-                file.getSize(),
-                file.getContentType() != null
-                        ? file.getContentType()
+                fileUpload.getSize(),
+                itemInput.getContentType() != null
+                        ? itemInput.getContentType()
                         : getMediaTypeForFileExtension(filename2Ext.ext()).toString(),
                 false,
                 now
@@ -321,5 +319,4 @@ public class FileService implements BaseFileService {
             range.setEndByte(fileRecord.getSize());
         }
     }
-
 }

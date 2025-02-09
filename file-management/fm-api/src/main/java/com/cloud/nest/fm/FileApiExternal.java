@@ -6,6 +6,7 @@ import com.cloud.nest.fm.inout.response.UploadedFileOut;
 import com.cloud.nest.platform.infrastructure.auth.UserAuthSession;
 import com.cloud.nest.platform.infrastructure.streaming.ContentRangeSelection;
 import jakarta.annotation.Nullable;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -13,7 +14,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.util.List;
@@ -40,7 +40,7 @@ public interface FileApiExternal {
 
     String PATH_ID = "/{" + PARAM_ID + "}";
 
-    CompletableFuture<UploadedFileOut> uploadFile(UserAuthSession session, MultipartFile... files);
+    CompletableFuture<UploadedFileOut> uploadFile(UserAuthSession session, HttpServletRequest request);
 
     CompletableFuture<Void> updateFileMeta(UserAuthSession session, @Min(1L) Long id, @Valid FileMetaIn in);
 
